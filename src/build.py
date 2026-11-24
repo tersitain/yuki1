@@ -14,29 +14,44 @@ G2 = ('引羽雲園遠何科夏家歌画回会海絵外角楽活間丸岩顔汽�
 assert len(G1) == 80 and len(set(G1)) == 80, len(G1)
 assert len(G2) == 160 and len(set(G2)) == 160, len(G2)
 
+G3 = ('悪安暗医委意育員院飲運泳駅央横屋温化荷界開階寒感漢館岸起期客究急級宮球去橋業曲局銀区苦具君係軽血決研県庫湖向幸港号根祭皿'
+      '仕死使始指歯詩次事持式実写者主守取酒受州拾終習集住重宿所暑助昭消商章勝乗植申身神真深進世整昔全相送想息速族他打対待代第題'
+      '炭短談着注柱丁帳調追定庭笛鉄転都度投豆島湯登等動童農波配倍箱畑発反坂板皮悲美鼻筆氷表秒病品負部服福物平返勉放味命面問役薬'
+      '由油有遊予羊洋葉陽様落流旅両緑礼列練路和')
+assert len(G3) == 200 and len(set(G3)) == 200 and not set(G3) & set(G1 + G2), len(G3)
+
+# グループ: k=2年生の漢字(1字1語) / j=2年生の字の熟語 / c=3年生の漢字
+OWN = {'k': G2, 'j': G2, 'c': G3}                 # 1列目に書ける字
+OK = {'k': G1 + G2, 'j': G1 + G2, 'c': G1 + G2 + G3}   # 語に使える字
 is_kanji = lambda c: '一' <= c <= '鿿'
 is_hira = lambda c: 'ぁ' <= c <= 'ゖ' or c == 'ー'
 errs = []
 units = []
-seen = []
+seen = {'k': [], 'j': [], 'c': []}
+words = {'k': [], 'j': [], 'c': []}
+g = 'k'
 for ln in (SRC / 'kanji.txt').read_text(encoding='utf-8').splitlines():
     if not ln.strip():
         continue
+    if ln.startswith('@'):
+        g = ln[1:].strip(); continue
     if ln.startswith('#'):
         t, e = ln[1:].strip().split('|')
-        units.append({'t': t, 'e': e, 'k': []})
+        units.append({'g': g, 't': t, 'e': e, 'k': []})
         continue
     k, s = ln.split('\t')
     m = re.fullmatch(r'([^{}]*)\{([^|{}]+)\|([^|{}]+)\}([^{}]*)', s)
     if not m:
         errs.append(f'形式: {ln}'); continue
     pre, word, read, post = m.groups()
-    if k not in G2: errs.append(f'2年の字ではない: {k}')
-    if k in seen: errs.append(f'重複: {k}')
-    seen.append(k)
+    if k not in OWN[g]: errs.append(f'{g}: この学年の字ではない: {k}')
+    if g != 'j' and k in seen[g]: errs.append(f'{g}: 重複: {k}')
+    seen[g].append(k)
+    if word in words[g] or (g == 'j' and word in words['k']): errs.append(f'{g}: 語の重複: {word}')
+    words[g].append(word)
     if k not in word: errs.append(f'語に字がない: {k} {word}')
     for c in word:
-        if is_kanji(c) and c not in G1 + G2: errs.append(f'未習の字: {word} の {c}')
+        if is_kanji(c) and c not in OK[g]: errs.append(f'{g}: 未習の字: {word} の {c}')
     for c in pre + post:
         if is_kanji(c): errs.append(f'文に漢字: {s}')
     if not all(is_hira(c) for c in read): errs.append(f'よみがひらがなでない: {read}')
@@ -49,25 +64,16 @@ for ln in (SRC / 'kanji.txt').read_text(encoding='utf-8').splitlines():
     if not sread: errs.append(f'よみの切り分け: {word} {read}')
     units[-1]['k'].append([k, pre, stem, sread, oku, post])
 
-missing = set(G2) - set(seen)
-if missing: errs.append('不足: ' + ''.join(sorted(missing)))
+for gg in ('k', 'c'):
+    missing = set(OWN[gg]) - set(seen[gg])
+    if missing: errs.append(f'{gg}: 不足: ' + ''.join(sorted(missing)))
 if errs:
     print('\n'.join(errs)); sys.exit(1)
 
-total = sum(len(u['k']) for u in units)
-print('単元', len(units), '漢字', total, '問題', total * 2)
-for u in units:
-    print(' ', u['t'], len(u['k']), ''.join(x[0] for x in u['k']))
-# 参考：語幹のよみが重なる組（かき問題の選択肢から自動で外す）
-from collections import defaultdict
-d = defaultdict(list)
-for u in units:
-    for x in u['k']: d[x[3]].append(x[2])
-print('同じよみ:', {k: v for k, v in d.items() if len(v) > 1})
-d = defaultdict(list)
-for u in units:
-    for x in u['k']: d[x[4]].append(x[2] + x[4])
-print('送りがな別:', {k: len(v) for k, v in d.items()})
+for gg in 'kjc':
+    us = [u for u in units if u['g'] == gg]; n = sum(len(u['k']) for u in us)
+    print(gg, '単元', len(us), '語', n, '問題', n * 2, '|', ' '.join(f"{u['t']}{len(u['k'])}" for u in us))
+print('じゅくごで出ていない2年生の字:', ''.join(c for c in G2 if c not in ''.join(words['j'])))
 
 tpl = (SRC / 'template.html')
 if tpl.exists():
