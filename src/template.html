@@ -94,6 +94,18 @@ svg.px{display:block}
 .sent.num{font-size:3.2rem;line-height:1.6;letter-spacing:.04em}
 .sent.num mark{min-width:1.6em;display:inline-block}
 .yomi{text-align:center;font-size:1.2rem;font-weight:700;color:var(--kk);min-height:1.9em;margin:0}
+.how{background:var(--kk2);border-radius:16px;padding:10px 16px;margin:8px auto 4px;max-width:560px;text-align:left;font-size:1.05rem;font-weight:700;line-height:1.75}
+.how p{margin:2px 0}
+.how .fast{border-top:2px dashed var(--kk);margin-top:8px;padding-top:6px;color:var(--kk)}
+.how svg{display:block;margin:2px auto 6px;max-width:100%;height:auto}
+.how.hint{background:var(--hole)}
+.hbtn{border:2px solid var(--gold);background:var(--card);border-radius:999px;padding:6px 18px;font-weight:700;font-size:.95rem;min-height:44px;margin-top:4px}
+#hn{text-align:center}
+.sent.eq{font-size:2.7rem;letter-spacing:0}
+.gd h1{text-align:center;margin-bottom:8px}.gd>p{font-size:1.08rem;font-weight:600}
+.gd .sent{margin:22px 0 0}
+h2 .link{margin-left:auto}
+@media(max-width:520px){.sent.eq{font-size:1.9rem}}
 .spk{text-align:center;min-height:50px}
 .spk button{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 18px;font-weight:700;font-size:.95rem;color:var(--sub);min-height:44px}
 .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
@@ -169,11 +181,11 @@ const YOMI=[
  'はちいちが はち|はちに じゅうろく|はちさん にじゅうし|はちし さんじゅうに|はちご しじゅう|はちろく しじゅうはち|はちしち ごじゅうろく|はっぱ ろくじゅうし|はっく しちじゅうに',
  'くいちが く|くに じゅうはち|くさん にじゅうしち|くし さんじゅうろく|くご しじゅうご|くろく ごじゅうし|くしち ろくじゅうさん|くは しちじゅうに|くく はちじゅういち'
 ].map(s=>s.split('|'));
-const MON=['👾','🐲','👹','👻','🦖','🐙','🦂','🕷️','🦇','🐍','🦈','🐊','🦑','🧟','👺','🤖','🦍','🐗','🦅','🐯','🦁','🐉','☃️','🎃','🧛','🦏','🐺','🦕','🐻','🦉','🦀','🐝','🦎','🐘','🐳','🦄'];
+const MON=['👾','🐲','👹','👻','🦖','🐙','🦂','🕷️','🦇','🐍','🦈','🐊','🦑','🧟','👺','🤖','🦍','🐗','🦅','🐯','🦁','🐉','☃️','🎃','🧛','🦏','🐺','🦕','🐻','🦉','🦀','🐝','🦎','🐘','🐳','🦄','🦔','🐢','🦜','🐬','🦋'];
 // 形のにた字（「むずかしい」の かき問題で、まぎらわしい選択肢に使う）
 const LOOK=['話語読記計','線組細紙絵','近遠道通週','間聞門','海池汽活','体何作休','晴明曜時春昼星朝書','雲雪電雨','姉妹女市','茶花草','地場土池','国図回園','思心田','鳴知合台古同兄言高京','家室字','京交高夜方','前切分刀力','弓引強弱弟','鳥馬魚鳴黒点','父交','午牛年','万方','内肉円','米来番','東車','毛手','頭顔首道','光元兄先見','太大犬','少小','首自目白百','古右石','止正上','丸九','今会合食','夏冬麦','秋科','新親','売買読','買貝見','歩走止足','野里理黒','毎海母','用角月','西四','教数','算答','店広','寺時','多夕外名','岩山石'];
 // ボスの制限時間（秒）。たおすたびに短くなる
-const TIME={k:[15,12,10],m:[10,8,6],M:[30,25,20]};
+const TIME={k:[15,12,10],m:[10,8,6],M:[30,25,20],S:[25,20,15]};
 const PRAISE=['せいかい！','やったね！','すごい！','そのちょうし！','ばっちり！'];
 
 const $=document.getElementById('app');
@@ -215,17 +227,62 @@ for(let a=1;a<=9;a++){const ui=UNITS.length,qs=[];
 for(let a=11;a<=19;a++){const ui=UNITS.length,qs=[];
   for(let b=2;b<=19;b++)qs.push({key:'m:'+a+'x'+b,type:'m',u:ui,a,b});
   UNITS.push({id:'m'+a,g:'M',t:a+'のだん',e:String(a),qs})}
-const GROUPS={k:'かんじ',m:'九九',M:'19×19'};
+/* □の けいさん：□に入る数をもとめる。問題は「きまった たね」から作るので、毎回同じならびになる */
+const OPS={'＋':(a,b)=>a+b,'−':(a,b)=>a-b,'×':(a,b)=>a*b};
+// t=[P,op,Q] または [P,op,Q,op,R]（null が □）。左から じゅんに けいさんする
+function steps(t,x){const v=i=>t[i]==null?x:t[i],a=[OPS[t[1]](v(0),v(2))];if(t.length>3)a.push(OPS[t[3]](a[0],v(4)));return a}
+const mkS=(t,x)=>({type:'s',t,x,c:steps(t,x).pop()});
+function rng(seed){return ()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const RI=(r,a,b)=>a+Math.floor(r()*(b-a+1));
+const SDEF=[
+ {t:'たしざんの □',e:'＋',n:14,mk:r=>{const x=RI(r,3,58),a=RI(r,4,40);return r()<.5?[[null,'＋',a],x]:[[a,'＋',null],x]}},
+ {t:'ひきざんの □',e:'−',n:14,mk:r=>{if(r()<.5){const a=RI(r,4,40);return [[null,'−',a],RI(r,a+2,95)]}const a=RI(r,20,98);return [[a,'−',null],RI(r,3,a-2)]}},
+ {t:'かけざんの □',e:'×',n:14,mk:r=>{const a=RI(r,2,9),x=RI(r,2,9);return r()<.5?[[null,'×',a],x]:[[a,'×',null],x]}},
+ {t:'3つの かずの しき',e:'＋−',n:16,mk:r=>{const t=[RI(r,5,30),r()<.5?'＋':'−',RI(r,2,15),r()<.5?'＋':'−',RI(r,1,12)],h=RI(r,0,2)*2,x=t[h];t[h]=null;return [t,x]}},
+ {t:'かけざん まじり',e:'×＋',n:14,mk:r=>{const a=RI(r,2,9),x=RI(r,2,9),b=RI(r,1,12),o=r()<.5?'＋':'−';return [r()<.5?[a,'×',null,o,b]:[null,'×',a,o,b],x]}}];
+SDEF.forEach((d,i)=>{const r=rng(101+i),ui=UNITS.length,qs=[],seen=new Set();
+  for(let n=0;qs.length<d.n&&n<3000;n++){const [t,x]=d.mk(r),st2=steps(t,x),c=st2[st2.length-1],key='s:'+t.map(v=>v==null?'□':v).join('')+'＝'+c;
+    if(x<1||st2.some(v=>v<0)||c>100||c<1||seen.has(key))continue;seen.add(key);qs.push({key,type:'s',u:ui,t,x,c})}
+  UNITS.push({id:'s'+i,g:'S',t:d.t,e:d.e,qs})});
+const GROUPS={k:'かんじ',m:'九九',M:'19×19',S:'□の けいさん'};
+const B=v=>v==null?'□':v;
+const expr=(t,c,x)=>t.map(v=>v==null?(x==null?'□':x):v).join(' ')+' ＝ '+c;
+// 1つの しき（P op Q ＝ c、どちらかが □）→ [こたえ, せつめい, ヒント]
+function one(P,op,Q,c){
+  if(op==='＋'){const o=P==null?Q:P,x=c-o;return [x,`${P==null?'□に '+o:o+'に □'}を たすと ${c}。ぎゃくに ${c}から ${o}を ひく：${c} − ${o} ＝ ${x}`,`たして ${c}に なった。ぎゃくに、${c}から ${o}を ひいて みよう`]}
+  if(op==='−'){if(P==null){const x=c+Q;return [x,`□から ${Q}を ひくと ${c}。ぎゃくに ${c}に ${Q}を たす：${c} ＋ ${Q} ＝ ${x}`,`ひいて ${c}に なった。ぎゃくに、${c}に ${Q}を たして みよう`]}
+    const x=P-c;return [x,`${P}から □を ひくと ${c}。ひいた かずは ${P} − ${c} ＝ ${x}`,`${P}から いくつ ひくと ${c}に なるかな？ ${P} − ${c} を けいさんして みよう`]}
+  const o=P==null?Q:P,x=c/o;return [x,`${P==null?'□に '+o:o+'に □'}を かけると ${c}。${o}のだんで ${c}に なるのは ${o}×${x}＝${c}。だから ${x}`,`${o}のだんの 九九で、こたえが ${c}に なるのを さがそう`]}
+function solve(q){const t=q.t,c=q.c;
+  if(t.length===3){const r=one(t[0],t[1],t[2],c);return {lines:[r[1]],hint:r[2]}}
+  if(t[4]==null){const m=OPS[t[1]](t[0],t[2]),r=one(m,t[3],null,c);
+    return {lines:[`① さきに ${t[0]} ${t[1]} ${t[2]} を けいさんする：${m}`,`② しきは「${m} ${t[3]} □ ＝ ${c}」に なる`,'③ '+r[1]],hint:`さきに ${t[0]} ${t[1]} ${t[2]} を けいさんしよう。しきが みじかく なるよ`}}
+  const inv=t[3]==='＋'?'−':'＋',m=t[3]==='＋'?c-t[4]:c+t[4],r=one(t[0],t[1],t[2],m),sub=`${B(t[0])} ${t[1]} ${B(t[2])}`;
+  return {lines:[`① さいごの「${t[3]} ${t[4]}」を もとに もどす：${c} ${inv} ${t[4]} ＝ ${m}`,`② しきは「${sub} ＝ ${m}」に なる`,'③ '+r[1]],hint:`さいごの「${t[3]} ${t[4]}」を もとに もどそう。${c} ${inv} ${t[4]} は いくつ？ それが「${sub}」の こたえだよ`}}
+const howS=q=>`<div class="how">${solve(q).lines.map(l=>`<p>${esc(l)}</p>`).join('')}<p class="fast">たしかめ：${esc(expr(q.t,q.c,q.x))} ⭕</p></div>`;
+/* 19×19：10 と のこり に わけて、へやごとに けいさんする（図つき） */
+function area(a,b,vals){const p=a-10,two=b>10,cols=two?[10,b-10]:[10,p],rows=two?[10,p]:[b],W=[150,116],H=two?[58,46]:[58],x0=40,y0=26;
+  const F=['rgba(239,111,46,.2)','rgba(31,154,140,.2)','rgba(240,172,28,.25)','rgba(138,99,230,.2)'];let h='',y=y0;
+  rows.forEach((rv,i)=>{let x=x0;h+=`<text x="${x0-10}" y="${y+H[i]/2+5}" text-anchor="end" class="lb">${rv}</text>`;
+    cols.forEach((cv,j)=>{if(!i)h+=`<text x="${x+W[j]/2}" y="${y0-8}" text-anchor="middle" class="lb">${cv}</text>`;
+      h+=`<rect x="${x}" y="${y}" width="${W[j]}" height="${H[i]}" fill="${F[i*2+j]}" stroke="var(--sub)" stroke-width="1.5"/><text x="${x+W[j]/2}" y="${y+H[i]/2+5}" text-anchor="middle" class="cv">${two?rv+'×'+cv:cv+'×'+rv}${vals?'＝'+rv*cv:''}</text>`;x+=W[j]});y+=H[i]});
+  return `<svg viewBox="0 0 ${x0+W[0]+W[1]+6} ${y+6}" width="${x0+W[0]+W[1]+6}" height="${y+6}" aria-hidden="true"><style>.lb{font-size:15px;font-weight:700;fill:var(--sub)}.cv{font-size:15px;font-weight:700;fill:var(--ink)}</style>${h}</svg>`}
+function howM(q,hint){const a=q.a,b=q.b,p=a-10,r=b-10,P=l=>`<p>${l}</p>`;
+  if(b===10)return P(hint?'💡 10ばいは、かずの うしろに 0を 1つ つけるよ':`10ばいは、うしろに 0を つける：${a} → ${a*b}`);
+  if(b<10)return area(a,b,!hint)+P(`${hint?'💡 ':''}① ${a} を 10 と ${p} に わける`)+(hint?P(`② それぞれに ${b}を かけて、2つを たそう`):P(`② 10×${b}＝${10*b}、${p}×${b}＝${p*b}`)+P(`③ たすと ${10*b} ＋ ${p*b} ＝ ${a*b}`));
+  return area(a,b,!hint)+P(`${hint?'💡 ':''}① ${a} を 10 と ${p}、${b} を 10 と ${r} に わける`)+(hint?P('② 4つの へやを それぞれ けいさんして、ぜんぶ たそう'):P(`② 10×10＝100　10×${r}＝${10*r}　${p}×10＝${p*10}　${p}×${r}＝${p*r}`)+P(`③ ぜんぶ たすと 100 ＋ ${10*r} ＋ ${p*10} ＋ ${p*r} ＝ ${a*b}`)
+    +`<p class="fast">はやわざ：${a} ＋ ${r} ＝ ${a+r} を 10ばいして ${(a+r)*10}。そこに ${p}×${r}＝${p*r} を たして ${a*b}</p>`)}
 function looks(k){const s=new Set();LOOK.forEach(g=>{if(g.includes(k))[...g].forEach(c=>{if(c!==k)s.add(c)})});return [...s]}
-function how(q){const a=q.a,b=q.b;if(a<10)return YOMI[a-1][b-1];
-  return b>10?`${a}×10＝${a*10} と ${a}×${b-10}＝${a*(b-10)} を あわせて ${a*b}`:b===10?`${a} の 10ばいで ${a*b}`:`10×${b}＝${10*b} と ${a-10}×${b}＝${(a-10)*b} を あわせて ${a*b}`}
 const every=g=>UNITS.reduce((a,u)=>(!g||u.g===g)?a.concat(u.qs):a,[]);
 const same=q=>q.e?q.e.k:q.key;   // 同じ字のよみ・かきは1回の中で重ねない
-const ans=q=>q.type==='r'?q.e.sr+q.e.oku:q.type==='w'?q.e.stem:String(q.a*q.b);
+const ans=q=>q.type==='r'?q.e.sr+q.e.oku:q.type==='w'?q.e.stem:q.type==='s'?String(q.x):String(q.a*q.b);
+const isNum=q=>q.type==='m'||q.type==='s';
 // 送りがなの形：ようす（〜い）、うごき（〜う段）、そのほか（名前のことば）
 const kind=o=>/い$/.test(o)?'a':/[うくすつぬむるぐぶ]$/.test(o)?'v':'n';
 function opts(q){
   const n=lv()===2?4:3;
+  if(q.type==='s'){const c=q.x,s=new Set();shuf([c-1,c+1,c-2,c+2,c+10,c-10,c+5]).forEach(v=>{if(s.size<n-1&&v>=0&&v!==c)s.add(v)});
+    return [c].concat([...s]).sort((x,y)=>x-y).map(String)}
   if(q.type==='m'){const c=q.a*q.b,s=new Set(),a=q.a,b=q.b;
     (a>9?[c-10,c+10,c-a,c+a,c-b,c+b]:[a*(b-1),a*(b+1),(a-1)*b,(a+1)*b]).forEach(v=>{if(v>0&&v!==c)s.add(v)});
     [c+1,c-1,c+2,c+10].forEach(v=>{if(s.size<n-1&&v>0&&v!==c)s.add(v)});
@@ -241,17 +298,20 @@ function opts(q){
     return s};
   cand.map(o=>[score(o),o]).sort((x,y)=>y[0]-x[0]).some(([,o])=>{const v=r?full(o):o.stem;if(!out.includes(v))out.push(v);return out.length>=n});
   return shuf(out)}
-function label(q){return q.type==='r'?'いろの ついた かんじは、なんと よむかな？':q.type==='w'?'いろの ついた ところを、かんじで かくと どれかな？':lv()===2?'こたえを すうじで いれよう':'こたえは どれかな？'}
+function label(q){return q.type==='r'?'いろの ついた かんじは、なんと よむかな？':q.type==='w'?'いろの ついた ところを、かんじで かくと どれかな？':q.type==='s'?(lv()===2?'□に はいる かずを いれよう':'□に はいる かずは どれかな？'):lv()===2?'こたえを すうじで いれよう':'こたえは どれかな？'}
 function body(q,done){
-  if(q.type==='m')return `<p class="sent num">${q.a} × ${q.b} ＝ <mark class="${done?'done':''}">${done?q.a*q.b:'？'}</mark></p><p class="yomi">${done?esc(how(q)):''}</p>`;
+  if(q.type==='m')return `<p class="sent num">${q.a} × ${q.b} ＝ <mark class="${done?'done':''}">${done?q.a*q.b:'？'}</mark></p>`+(done&&q.a>10?`<div class="how">${howM(q)}</div>`:`<p class="yomi">${done?esc(YOMI[q.a-1][q.b-1]):''}</p>`);
+  if(q.type==='s')return `<p class="sent num eq">${q.t.map(v=>v==null?`<mark class="${done?'done':''}">${done?q.x:'□'}</mark>`:v).join(' ')} ＝ ${q.c}</p>`+(done?howS(q):'<p class="yomi"></p>');
   const e=q.e;let mid;
   if(done)mid=`<mark class="done"><ruby class="kj">${esc(e.stem)}<rt>${esc(e.sr)}</rt></ruby></mark>${esc(e.oku)}`;
   else if(q.type==='r')mid=`<mark class="kj">${esc(e.stem+e.oku)}</mark>`;
   else mid=`<mark>${esc(e.sr)}</mark>${esc(e.oku)}`;
   return `<p class="sent">${esc(e.pre)}${mid}${esc(e.post)}</p>`}
-function voice(q,done){if(q.type==='m')return !done?q.a+' かける '+q.b+' は？':q.a<10?YOMI[q.a-1][q.b-1]:q.a+' かける '+q.b+' は '+q.a*q.b;
+const SAY={'＋':'たす','−':'ひく','×':'かける'};
+function voice(q,done){if(q.type==='s')return q.t.map(v=>v==null?(done?q.x:'しかく'):SAY[v]||v).join(' ')+' は '+q.c;
+  if(q.type==='m')return !done?q.a+' かける '+q.b+' は？':q.a<10?YOMI[q.a-1][q.b-1]:q.a+' かける '+q.b+' は '+q.a*q.b;
   if(q.type==='r'&&!done)return '';const e=q.e;return e.pre+e.sr+e.oku+e.post}
-function plain(q){if(q.type==='m')return q.a+' × '+q.b+' ＝ '+q.a*q.b;const e=q.e;
+function plain(q){if(q.type==='s')return expr(q.t,q.c)+'　□＝'+q.x;if(q.type==='m')return q.a+' × '+q.b+' ＝ '+q.a*q.b;const e=q.e;
   return e.pre+'【'+e.stem+e.oku+'】'+e.post+'　'+(q.type==='r'?'よみ：'+e.sr+e.oku:'かき：'+e.stem)}
 
 /* ---- よみあげ ---- */
@@ -355,7 +415,7 @@ function home(){
   stopTick();screen='home';hush();const r=rounds(today()),pe=pending().length,won=UNITS.filter((_,k)=>beaten(k)).length;
   const tot=allStamps(),fl=Math.floor(tot/PET),pet=tot%PET;let got='';
   for(let i=Math.max(0,fl-12);i<fl;i++)got+=tile(PET,46,i);
-  const tk=totals('k'),tm=totals('m'),tM=totals('M');
+  const tk=totals('k'),tm=totals('m'),tM=totals('M'),tS=totals('S');
   let h=`<div class="head"><h1>2年生 かんじ・九九クイズ</h1><div class="hb"><button class="link" id="sd">${sndOn()?'🔊 おと あり':'🔇 おと なし'}</button><button class="link" id="rc">おうちの方へ</button></div></div>
   <div class="stampbox"><div class="cur">${tile(pet,84,fl)}<div><b>いきものスタンプ <em>${fl}</em> こ</b><small>いまは「${STAGE[pet]}」。あと ${PET-pet}かいで おとなに なるよ</small></div></div>
   <div class="got">${got}${fl>12?`<b>ぜんぶで ${fl}こ</b>`:''}</div>
@@ -368,9 +428,12 @@ function home(){
   <h2>✖️ 九九 <small>${tm.c} / ${tm.n} もん クリア</small></h2>
   <div class="bar"><button class="btn kk big" data-g="m">▶ 九九を ${N}もん</button><button class="btn" id="mmix">九九 ミックス</button></div>
   <div class="units">${UNITS.map((u,k)=>u.g==='m'?unitCard(u,k):'').join('')}</div>
-  <h2>🔢 19×19 <small>${tM.c} / ${tM.n} もん クリア</small></h2>
+  <h2>🔢 19×19 <small>${tM.c} / ${tM.n} もん クリア</small><button class="link" data-h="M">📖 やりかた</button></h2>
   <div class="bar"><button class="btn kk big" data-g="M">▶ 19×19を ${N}もん</button></div>
   <div class="units">${UNITS.map((u,k)=>u.g==='M'?unitCard(u,k):'').join('')}</div>
+  <h2>🟦 □の けいさん <small>${tS.c} / ${tS.n} もん クリア</small><button class="link" data-h="S">📖 やりかた</button></h2>
+  <div class="bar"><button class="btn kk big" data-g="S">▶ □の けいさんを ${N}もん</button></div>
+  <div class="units">${UNITS.map((u,k)=>u.g==='S'?unitCard(u,k):'').join('')}</div>
   <h2>👾 ボスバトル <small>たおした かず ${won} / ${UNITS.length}</small></h2>
   <p class="alert" id="lk" hidden></p>
   <div class="bosses">${UNITS.map((u,k)=>{const b=beaten(k),l=lockLeft(k);
@@ -379,6 +442,7 @@ function home(){
   $.innerHTML=h;
   $.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>start(+b.dataset.u));
   $.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>next(b.dataset.g));
+  $.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>guide(b.dataset.h));
   document.getElementById('mmix').onclick=()=>run(uniq(shuf(every('m')),N),'九九 ミックス',null,'mix');
   document.getElementById('rc').onclick=()=>records();
   document.getElementById('sd').onclick=()=>{st.set.snd=!sndOn();save();sfx('ok');home()};
@@ -387,22 +451,33 @@ function home(){
     const e=document.getElementById('lk');e.hidden=false;e.textContent='🔒 「'+UNITS[k].t+'」の ボスと たたかうには、あと '+n+'もん クリアしよう。';e.scrollIntoView({block:'nearest'})});
   window.scrollTo(0,0)}
 
+/* ---- やりかたの せつめい ---- */
+function guide(g){stopTick();screen='guide';hush();
+  let h='<div class="top"><button class="back" id="bk">← もどる</button><span></span></div><div class="card gd">';
+  if(g==='M')h+='<h1>19×19の やりかた</h1><p>大きい かずの かけざんは、<b>「10」と「のこり」に わける</b>と、10ばいと 九九だけで できるよ。</p>'
+    +[{a:13,b:17},{a:14,b:6}].map(q=>`<p class="sent num eq">${q.a} × ${q.b} ＝ ${q.a*q.b}</p><div class="how">${howM(q)}</div>`).join('')
+    +'<p class="sent num eq">12 × 10 ＝ 120</p><div class="how"><p>10ばいは、かずの うしろに 0を 1つ つけるだけ。</p></div>';
+  else h+='<h1>□の けいさんの やりかた</h1><p>□の かずは、<b>しきを ぎゃくに たどる</b>と わかるよ。たしざんは ひきざんで、ひきざんは たしざんで もとに もどそう。さいごに、□に こたえを いれて たしかめよう。</p>'
+    +[mkS([null,'＋',27],36),mkS([72,'−',null],27),mkS([null,'×',7],8),mkS([15,'−',null,'＋',4],7),mkS([3,'×',null,'＋',4],5)].map(q=>`<p class="sent num eq">${esc(expr(q.t,q.c))}</p>${howS(q)}`).join('');
+  $.innerHTML=h+'<div class="bar ctr" style="margin-top:20px"><button class="btn pri big" id="go">▶ やってみる</button></div></div>';
+  document.getElementById('bk').onclick=home;document.getElementById('go').onclick=()=>next(g);window.scrollTo(0,0)}
+
 /* ---- もんだいを出す（共通） ---- */
 // #qa に選択肢（むずかしいの計算はテンキー）を出し、答えたら done(正解か, 時間切れか) を1回だけ呼ぶ
 function ask(q,done){
   const el=document.getElementById('qa'),a=ans(q);let fin=false;
-  const end=(ok,out)=>{document.getElementById('qs').innerHTML=body(q,true);spk(q,true);
+  const end=(ok,out)=>{document.getElementById('qs').innerHTML=body(q,true);spk(q,true);const hn=document.getElementById('hn');if(hn)hn.innerHTML='';
     const m=document.getElementById('ms');m.className='msg '+(ok?'ok':'ng');
     m.textContent=ok?'⭕ '+PRAISE[Math.floor(Math.random()*PRAISE.length)]:(out?'⏰ じかんぎれ！ ':'❌ ')+'こたえは「'+a+'」だよ';done(ok,!!out)};
-  if(q.type==='m'&&lv()===2){let v='';el.className='pad';
+  if(isNum(q)&&lv()===2){let v='';el.className='pad';
     el.innerHTML=[7,8,9,4,5,6,1,2,3].map(n=>`<button class="key" data-n="${n}">${n}</button>`).join('')+'<button class="key sub" data-n="x">けす</button><button class="key" data-n="0">0</button><button class="key go" data-n="ok">こたえる</button>';
-    const ks=[...el.querySelectorAll('.key')],mk=()=>{const m=document.querySelector('#qs mark');if(m)m.textContent=v||'？'};
+    const ks=[...el.querySelectorAll('.key')],mk=()=>{const m=document.querySelector('#qs mark');if(m)m.textContent=v||(q.type==='s'?'□':'？')};
     const finish=out=>{if(fin)return;fin=true;ks.forEach(k=>k.disabled=true);end(!out&&v===a,out)};
     ks.forEach(k=>k.onclick=()=>{if(fin)return;const n=k.dataset.n;
       if(n==='ok'){if(v)finish(false);return}
       sfx('tap');if(n==='x')v=v.slice(0,-1);else if(v.length<3)v=(v==='0'?'':v)+n;mk()});
     return {timeout:()=>finish(true)}}
-  const os=opts(q),cls=q.type==='w'?'kj':q.type==='m'?'n':os.some(o=>o.length>5)?'long':'';
+  const os=opts(q),cls=q.type==='w'?'kj':isNum(q)?'n':os.some(o=>o.length>5)?'long':'';
   el.className='opts'+(os.length===4?' four':'');
   el.innerHTML=os.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(o)}</button>`).join('');
   const bs=[...el.querySelectorAll('.opt')];
@@ -411,7 +486,11 @@ function ask(q,done){
   bs.forEach((b,i)=>b.onclick=()=>finish(i));return {timeout:()=>finish(-1)}}
 function spk(q,done){const el=document.getElementById('sp'),t=voice(q,done);
   el.innerHTML=t&&ttsOn()?'<button id="sb">🔊 きく</button>':'';if(t&&ttsOn())document.getElementById('sb').onclick=()=>speak(t)}
-function qcard(q,extra){return `<div class="card">${extra||''}<p class="ask">${label(q)}</p><div id="qs">${body(q,false)}</div><div class="spk" id="sp"></div><div class="opts" id="qa"></div><p class="msg" id="ms"></p><div class="bar ctr"><button class="btn pri big" id="nx" hidden>つぎへ ▶</button></div></div>`}
+// ヒント（□の けいさん と 11〜19のだん。ふつうの回だけ。ボスでは出さない）
+function hintBtn(q){const el=document.getElementById('hn');if(!(q.type==='s'||(q.type==='m'&&q.a>10)))return;
+  el.innerHTML='<button class="hbtn" id="hb">💡 ヒント</button>';
+  document.getElementById('hb').onclick=()=>{sfx('tap');el.innerHTML=`<div class="how hint">${q.type==='s'?'<p>💡 '+esc(solve(q).hint)+'</p>':howM(q,true)}</div>`}}
+function qcard(q,extra){return `<div class="card">${extra||''}<p class="ask">${label(q)}</p><div id="qs">${body(q,false)}</div><div class="spk" id="sp"></div><div id="hn"></div><div class="opts" id="qa"></div><p class="msg" id="ms"></p><div class="bar ctr"><button class="btn pri big" id="nx" hidden>つぎへ ▶</button></div></div>`}
 
 function run(qs,title,u,g,isRev){
   if(!qs.length)return home();
@@ -420,7 +499,7 @@ function run(qs,title,u,g,isRev){
     let dots='';for(let i=0;i<base;i++)dots+=`<i class="${log[i]==null?(i===k?'now':''):log[i]?'ok':'ng'}"></i>`;
     $.innerHTML=`<div class="top"><button class="back" id="bk">← やめる</button><span class="ttl">${esc(title)}</span><div class="dots">${dots}</div></div>`
       +qcard(q,q.re?'<p style="text-align:center;margin:0 0 6px"><span class="tag">もういちど ちょうせん</span></p>':'');
-    document.getElementById('bk').onclick=home;spk(q,false);
+    document.getElementById('bk').onclick=home;spk(q,false);hintBtn(q);
     ask(q,ok=>{sfx(ok?'ok':'ng');mark(q,ok);if(!q.re){log[k]=ok;if(ok)score++;else qs.push(Object.assign({},q,{re:1}))}
       row=ok?row+1:0;if(row>=3)document.getElementById('ms').textContent+='　🔥 '+row+'もん れんぞく！';
       const nx=document.getElementById('nx');nx.hidden=false;nx.onclick=()=>{hush();k++;k<qs.length?show():result()}});
@@ -503,7 +582,7 @@ function records(){
   <div class="bar"><button class="btn sm" id="ex">記録を書き出す</button><button class="btn sm" id="im">貼りつけた記録を読みこむ</button><button class="btn sm" id="rs">記録をすべて消す</button><button class="btn sm rev" id="rs2" hidden>本当に消す（元に戻せません）</button></div>
   <textarea id="tx" placeholder="ここに記録の文字列が出ます／貼りつけます"></textarea><p class="okline" id="bm"></p>
   <h2>このクイズについて</h2>
-  <p>かんじは、小学2年生で習う160字を1字につき「よみ」「かき」の2問ずつ（320問）。意味の近い字で18のまとまりに分けてあり、教科書の順番とは一致しません。例文に使う漢字は2年生までに習う字だけです。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。19×19は11〜19の段（各段 ×2〜×19、162問）で、答えたあとに「10のまとまりと残りに分ける」考え方を表示します。</p></div>`;
+  <p>かんじは、小学2年生で習う160字を1字につき「よみ」「かき」の2問ずつ（320問）。意味の近い字で18のまとまりに分けてあり、教科書の順番とは一致しません。例文に使う漢字は2年生までに習う字だけです。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。19×19は11〜19の段（各段 ×2〜×19、162問）で、「💡 ヒント」で分け方の図を、答えたあとに「10と残りに分ける」計算の手順を表示します。□の計算は、□に入る数をもとめる問題（5種類・${every('S').length}問）で、ヒントと、式を逆にたどる解き方の説明がつきます。</p></div>`;
   $.innerHTML=h;
   document.getElementById('bk').onclick=home;
   document.getElementById('lv').onclick=()=>{st.set.lv=lv()===2?1:2;save();records()};
