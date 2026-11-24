@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="2年クイズ">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#fff6e6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b1a18" media="(prefers-color-scheme: dark)">
+<title>2年生 かんじ・九九クイズ</title>
+<style>
+:root{--bg:#fff6e6;--card:#fff;--ink:#3b2f28;--sub:#85766a;--line:#eedfc8;--acc:#ef6f2e;--acc2:#ffe9d9;--kk:#1f9a8c;--kk2:#dcf3ef;--ok:#23944f;--okbg:#e2f6e8;--ng:#d94a36;--ngbg:#fde8e3;--gold:#f0ac1c;--hole:#fff1b8}
+@media(prefers-color-scheme:dark){:root{--bg:#1b1a18;--card:#282623;--ink:#f3ece2;--sub:#b0a597;--line:#423d36;--acc:#ff9a62;--acc2:#45301f;--kk:#5fd0c1;--kk2:#1d3a36;--ok:#63d391;--okbg:#1e3a29;--ng:#ff8f7d;--ngbg:#45231e;--gold:#f6c24f;--hole:#5a4a12}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Noto Sans CJK JP","Noto Sans JP",Meiryo,sans-serif;line-height:1.6;-webkit-text-size-adjust:100%;touch-action:manipulation}
+.kj{font-family:"YuKyokasho Yoko","YuKyokasho","UD デジタル 教科書体 NK-R","UD Digi Kyokasho NK-R","Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans CJK JP",sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(56px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+button{font:inherit;color:inherit;cursor:pointer}
+h1{font-size:1.5rem;margin:0}
+h2{font-size:1.2rem;margin:26px 0 10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h2 small{font-size:.85rem;color:var(--sub);font-weight:600}
+.head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.link{white-space:nowrap;flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-size:.85rem;font-weight:700;color:var(--sub)}
+.stampbox{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px 16px;margin:14px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.stampbox b{font-size:1rem}
+.stamps{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stamps span{width:46px;height:46px;border-radius:50%;border:2.5px dashed var(--line);display:grid;place-items:center;font-size:1.7rem;line-height:1}
+.stamps span.on{border:0;background:var(--acc2)}
+.cnt{margin-left:auto;display:flex;gap:14px;font-weight:700;font-size:.95rem;color:var(--sub)}
+.cnt i{font-style:normal;color:var(--ink);font-size:1.15rem}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.bar.ctr{justify-content:center}
+.btn{border:2px solid var(--line);background:var(--card);border-radius:16px;padding:12px 18px;font-weight:700;font-size:1.05rem;min-height:52px}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.kk{background:var(--kk);border-color:var(--kk);color:#fff}
+.btn.rev{border-color:var(--ng);color:var(--ng)}
+@media(prefers-color-scheme:dark){.btn.pri,.btn.kk{color:#1b1a18}}
+.btn.big{font-size:1.3rem;padding:14px 34px;min-height:62px;border-radius:20px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:active:not(:disabled),.opt:active:not(:disabled),.unit:active,.bz:active{transform:scale(.97)}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.unit{text-align:left;border:2px solid var(--line);background:var(--card);border-radius:18px;padding:12px 14px;display:block;width:100%;position:relative}
+.unit .em{font-size:1.9rem;line-height:1.2;display:block}
+.unit .num{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--kk2);color:var(--kk);font-size:1.5rem;font-weight:800}
+.unit b{display:block;font-size:1.02rem;margin-top:2px}
+.unit small{color:var(--sub);display:block;font-size:.82rem;font-weight:600}
+.unit .done{position:absolute;top:8px;right:10px;font-size:1.3rem}
+.unit .badge{position:absolute;top:10px;right:10px;background:var(--ngbg);color:var(--ng);border-radius:999px;padding:0 9px;font-size:.75rem;font-weight:700}
+.meter{height:8px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--acc);border-radius:4px}
+.unit.m .meter i{background:var(--kk)}
+.bosses{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.bz{border:2px solid var(--line);background:var(--card);border-radius:16px;padding:6px 2px 6px;text-align:center}
+.bz span{display:block;font-size:2rem;line-height:1.3}
+.bz small{display:block;font-size:.7rem;color:var(--sub);font-weight:600;line-height:1.35}
+.bz.off span{filter:grayscale(1);opacity:.3}
+.bz.lock{border-style:dashed}
+.bz.ready{border-color:var(--ng);animation:pulse 1.6s infinite}
+.bz.won{border-color:var(--gold)}
+@keyframes pulse{50%{box-shadow:0 0 0 5px var(--ngbg)}}
+.alert{background:var(--ngbg);color:var(--ng);border-radius:12px;padding:10px 14px;font-size:.95rem;font-weight:700;margin:8px 0}
+.okline{color:var(--ok);font-size:.82rem;font-weight:600;margin:6px 0}
+.note{color:var(--sub);font-size:.8rem;margin-top:26px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.back{color:var(--sub);background:none;border:0;padding:8px 4px;font-weight:700;font-size:1rem}
+.dots{display:flex;gap:7px;align-items:center}
+.dots i{width:16px;height:16px;border-radius:50%;background:var(--line);display:block}
+.dots i.ok{background:var(--ok)}.dots i.ng{background:var(--ng)}.dots i.now{background:var(--card);border:3px solid var(--acc)}
+.ttl{color:var(--sub);font-size:.9rem;font-weight:700}
+.card{background:var(--card);border:2px solid var(--line);border-radius:24px;padding:22px 20px}
+.ask{font-size:1.05rem;font-weight:700;color:var(--sub);margin:0 0 6px;text-align:center}
+.tag{display:inline-block;background:var(--ngbg);color:var(--ng);border-radius:999px;padding:1px 12px;font-size:.85rem;font-weight:700}
+.sent{font-size:2rem;font-weight:700;text-align:center;margin:18px 0 8px;line-height:2.3;word-break:keep-all;overflow-wrap:anywhere}
+.sent mark{background:var(--hole);color:inherit;border-radius:10px;padding:2px 8px;margin:0 3px;border-bottom:4px solid var(--acc)}
+.sent mark.kj{font-size:2.5rem}
+.sent mark.done{background:var(--okbg);border-color:var(--ok)}
+.sent ruby{font-size:2.5rem}
+.sent rt{font-size:1.05rem;font-weight:700;color:var(--ok);font-family:"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif}
+.sent.num{font-size:3.2rem;line-height:1.6;letter-spacing:.04em}
+.sent.num mark{min-width:1.6em;display:inline-block}
+.yomi{text-align:center;font-size:1.25rem;font-weight:700;color:var(--kk);min-height:1.9em;margin:0}
+.spk{text-align:center;min-height:50px}
+.spk button{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 18px;font-weight:700;font-size:.95rem;color:var(--sub);min-height:44px}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+.opt{border:3px solid var(--line);background:var(--card);border-radius:20px;padding:14px 6px;font-size:1.6rem;font-weight:700;min-height:88px;line-height:1.3;overflow-wrap:anywhere}
+.opt.kj{font-size:2.6rem}
+.opt.n{font-size:2.4rem}
+.opt.long{font-size:1.25rem}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ng{border-color:var(--ng);background:var(--ngbg)}
+.opt:disabled{cursor:default;color:inherit}
+.opt:disabled:not(.ok):not(.ng){opacity:.5}
+@media(max-width:520px){h1{font-size:1.2rem}.opts{grid-template-columns:1fr}.opt{min-height:64px}.sent{font-size:1.6rem}.sent.num{font-size:2.6rem}}
+.msg{font-weight:800;font-size:1.35rem;margin:14px 0 0;min-height:1.7em;text-align:center}
+.msg.ok{color:var(--ok)}.msg.ng{color:var(--ng)}
+.res{text-align:center}
+.res .stamp{font-size:5.5rem;line-height:1.2;display:inline-block;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(0) rotate(-40deg)}100%{transform:none}}
+.res h1{font-size:1.7rem;margin:4px 0}
+.res .sc{font-size:1.25rem;font-weight:700;margin:6px 0}
+.star{color:var(--gold);font-size:2.2rem;letter-spacing:6px}
+.star i{font-style:normal;color:var(--line)}
+.arena{text-align:center;margin:0 0 12px}
+.face{font-size:5rem;line-height:1.2;display:inline-block}
+.face.hit{animation:hit .45s}
+.face.down{filter:grayscale(1);transform:rotate(90deg);opacity:.6;transition:.5s}
+@keyframes hit{20%{transform:translateX(-12px) rotate(-8deg)}50%{transform:translateX(12px) rotate(8deg);opacity:.5}80%{transform:translateX(-5px)}}
+.bname{font-weight:800;font-size:1.1rem}
+.hp{height:16px;background:var(--line);border-radius:8px;overflow:hidden;max-width:420px;margin:6px auto 0}
+.hp i{display:block;height:100%;background:var(--ng);transition:width .4s}
+.hearts{font-size:1.5rem;letter-spacing:4px;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{text-align:left;font-size:.8rem;color:var(--sub);font-weight:600;padding:4px 6px;border-bottom:1.5px solid var(--line)}
+td{border-bottom:1px solid var(--line);padding:7px 6px;vertical-align:top}
+td.r,th.r{text-align:right;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.stats div{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center}
+.stats b{display:block;font-size:1.35rem;line-height:1.3}
+.stats small{color:var(--sub);font-size:.75rem}
+@media(max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}}
+.pa h2{font-size:1.05rem}
+.pa p{font-size:.92rem}
+textarea{width:100%;height:120px;margin-top:8px;font:inherit;font-size:.8rem;background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:8px}
+.sm{font-size:.9rem;padding:8px 14px;min-height:44px;border-radius:12px}
+.ngc{color:var(--ng);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const KANJI=[{"t":"かぞく","e":"👪","k":[["父","","父","ちち","","は かいしゃに いく。"],["母","","母","はは","","が りょうりを つくる。"],["兄","","兄","あに","","は ちゅうがくせいだ。"],["弟","","弟","おとうと","","と ボールで あそぶ。"],["姉","","姉","あね","","は ピアノが じょうずだ。"],["妹","","妹","いもうと","","は いちねんせいだ。"],["親","","親子","おやこ","","で さんぽを する。"],["友","","友","とも","だち","と こうえんへ いく。"]]},{"t":"からだ","e":"🙂","k":[["体","","体","からだ","","を うごかす。"],["頭","ぼうしを ","頭","あたま","","に かぶる。"],["顔","みずで ","顔","かお","","を あらう。"],["首","きりんは ","首","くび","","が ながい。"],["毛","ねこの ","毛","け","","は やわらかい。"],["声","おおきな ","声","こえ","","で うたう。"],["心","","心","こころ","","を こめて かく。"],["自","","自分","じぶん","","で きがえる。"],["才","いもうとは ","五才","ごさい","","だ。"]]},{"t":"きせつと そら","e":"🌸","k":[["春","","春","はる","","に さくらが さく。"],["夏","","夏","なつ","","は プールで およぐ。"],["秋","","秋","あき","","に はっぱが あかく なる。"],["冬","","冬","ふゆ","","は とても さむい。"],["雲","そらに しろい ","雲","くも","","が うかぶ。"],["雪","","雪","ゆき","","で だるまを つくる。"],["晴","あしたは ","晴","は","れ","だ。"],["風","つよい ","風","かぜ","","が ふく。"],["星","よぞらに ","星","ほし","","が ひかる。"],["光","たいようの ","光","ひかり","","が まぶしい。"]]},{"t":"いちにち","e":"🌅","k":[["朝","","朝","あさ",""," はやく おきる。"],["昼","","昼","ひる","","ごはんを たべる。"],["夜","","夜","よる","","は はやく ねる。"],["午","","午後","ごご","","から あめが ふる。"],["前","えきの ","前","まえ","","で まつ。"],["後","れつの ","後","うし","ろ","に ならぶ。"],["今","","今","いま","","、なんじですか。"]]},{"t":"じかん","e":"⏰","k":[["毎","","毎日","まいにち",""," ほんを よむ。"],["週","","来週","らいしゅう","","は えんそくだ。"],["曜","きょうは ","日曜日","にちようび","","だ。"],["時","","時間","じかん","","を まもる。"],["分","あと ","五分","ごふん","","で つく。"],["半","りんごを ","半分","はんぶん","","に きる。"],["間","きと きの ","間","あいだ","","を とおる。"]]},{"t":"ほうがく","e":"🧭","k":[["東","","東","ひがし","","から ひが のぼる。"],["西","","西","にし","","に ひが しずむ。"],["南","","南","みなみ","","の しまは あたたかい。"],["北","","北","きた","","の くには さむい。"],["内","","内","うち","がわ","から かぎを かける。"],["外","","外","そと","","で あそぶ。"],["方","","夕方","ゆうがた","","に いえへ かえる。"],["遠","がっこうは いえから ","遠","とお","い","。"],["近","こうえんは いえから ","近","ちか","い","。"]]},{"t":"いきもの・たべもの","e":"🐮","k":[["牛","","牛","うし","","が くさを たべる。"],["馬","","馬","うま","","に のる。"],["魚","かわで ","魚","さかな","","を つる。"],["鳥","","鳥","とり","","が そらを とぶ。"],["羽","とりが ","羽","はね","","を ひろげる。"],["鳴","ことりが ","鳴","な","く","。"],["肉","","肉","にく","","を やいて たべる。"],["米","","米","こめ","","を といで たく。"],["麦","","麦","むぎ","","の はたけが ひろがる。"],["茶","あつい お","茶","ちゃ","","を のむ。"],["食","ごはんを ","食","た","べる","。"]]},{"t":"しぜん","e":"⛰️","k":[["海","","海","うみ","","で およぐ。"],["池","","池","いけ","","に こいが いる。"],["岩","おおきな ","岩","いわ","","に のぼる。"],["谷","","谷","たに","","に かわが ながれる。"],["野","","野原","のはら","","で はなを つむ。"],["原","","原","はら","っぱ","で やきゅうを する。"],["地","","地図","ちず","","を みて あるく。"]]},{"t":"たてもの","e":"🏠","k":[["家","","家","いえ","","に かえる。"],["室","","教室","きょうしつ","","で べんきょうする。"],["戸","","戸","と","","を しめる。"],["門","がっこうの ","門","もん","","を くぐる。"],["寺","お","寺","てら","","の かねが なる。"],["店","","店","みせ","","で パンを かう。"],["台","","台","だい","","の うえに はこを おく。"],["場","","広場","ひろば","","に あつまる。"]]},{"t":"まち・くに","e":"🏙️","k":[["京","","東京","とうきょう","","に すんで いる。"],["市","","朝市","あさいち","","で やさいを かう。"],["国","ひろい ","国","くに","","を たびする。"],["社","","会社","かいしゃ","","で はたらく。"],["園","どうぶつ","園","えん","","で ぞうを みる。"],["公","","公園","こうえん","","で あそぶ。"],["道","","道","みち","","を わたる。"],["里","おじいさんの すむ ","里","さと","","に いく。"]]},{"t":"べんきょう","e":"📚","k":[["教","せんせいが うたを ","教","おし","える","。"],["科","","教科書","きょうかしょ","","を ひらく。"],["算","","算数","さんすう","","の じかんだ。"],["数","りんごの ","数","かず","","を しらべる。"],["語","","国語","こくご","","の じかんだ。"],["読","ほんを ","読","よ","む","。"],["書","てがみを ","書","か","く","。"],["記","まいばん ","日記","にっき","","を つける。"],["答","もんだいに ","答","こた","える","。"],["考","じっくり ","考","かんが","える","。"],["知","あたらしい ことを ","知","し","る","。"],["計","","時計","とけい","","を みる。"],["理","","理科","りか","","の じっけんを する。"]]},{"t":"はなす・つくる","e":"🎨","k":[["話","ともだちと ","話","はな","す","。"],["言","おれいを ","言","い","う","。"],["聞","おんがくを ","聞","き","く","。"],["絵","クレヨンで ","絵","え","","を かく。"],["画","","画用紙","がようし","","を くばる。"],["図","","図書室","としょしつ","","で ほんを かりる。"],["工","","工作","こうさく","","で ふねを つくる。"],["歌","みんなで ","歌","うた","","を うたう。"],["楽","えんそくは ","楽","たの","しい","。"],["紙","","紙","かみ","","を はんぶんに おる。"],["組","となりの ","組","くみ","","の ともだち。"]]},{"t":"かたち・いろ","e":"🔺","k":[["線","まっすぐな ","線","せん","","を ひく。"],["点","テストの ","点","てん","","が あがる。"],["形","ほしの ","形","かたち","","の クッキー。"],["角","","三角","さんかく","","の おにぎり。"],["丸","","丸","まる","い"," ボールを なげる。"],["番","かけっこで ","一番","いちばん","","に なる。"],["色","すきな ","色","いろ","","は あおだ。"],["黒","","黒","くろ","い"," ねこが いる。"],["黄","","黄色","きいろ","","の はなが さく。"]]},{"t":"うごき 1","e":"🏃","k":[["行","がっこうへ ","行","い","く","。"],["来","ともだちが いえに ","来","く","る","。"],["帰","いえに ","帰","かえ","る","。"],["歩","えきまで ","歩","ある","く","。"],["走","うんどうじょうを ","走","はし","る","。"],["通","くるまが みちを ","通","とお","る","。"],["止","バスが ","止","と","まる","。"],["回","こまが ","回","まわ","る","。"],["引","つなを ","引","ひ","く","。"],["切","はさみで かみを ","切","き","る","。"]]},{"t":"うごき 2","e":"🛒","k":[["売","やさいを ","売","う","る","。"],["買","おかしを ","買","か","う","。"],["作","カレーを ","作","つく","る","。"],["合","みんなで ちからを ","合","あ","わせる","。"],["会","えきで ともだちに ","会","あ","う","。"],["交","","交番","こうばん","","で みちを きく。"],["当","ボールが かべに ","当","あ","たる","。"],["用","おかあさんに ","用","よう","","が ある。"],["思","たのしいと ","思","おも","う","。"],["活","がっこうの ","生活","せいかつ","","は たのしい。"]]},{"t":"ようす 1","e":"📏","k":[["高","","高","たか","い"," やまに のぼる。"],["長","","長","なが","い"," かわを わたる。"],["広","","広","ひろ","い"," うみを ながめる。"],["太","","太","ふと","い"," きの みき。"],["細","","細","ほそ","い"," みちを あるく。"],["強","かぜが ","強","つよ","い","。"],["弱","ちからが ","弱","よわ","い","。"],["多","ひとが ","多","おお","い","。"],["少","みずが ","少","すく","ない","。"]]},{"t":"ようす 2","e":"✨","k":[["古","","古","ふる","い"," とけいが ある。"],["新","","新","あたら","しい"," くつを はく。"],["明","","明","あか","るい"," へやで よむ。"],["同","ふたりは ","同","おな","じ"," クラスだ。"],["直","まちがいを ","直","なお","す","。"],["元","","元気","げんき","","に あいさつする。"],["何","きょうは ","何","なに","","を して あそぶ？"],["万","","一万","いちまん","","にんが あつまる。"]]},{"t":"のりもの・どうぐ","e":"🚂","k":[["汽","","汽車","きしゃ","","が はしる。"],["船","","船","ふね","","で しまへ わたる。"],["電","","電車","でんしゃ","","に のる。"],["弓","","弓","ゆみ","","で まとを ねらう。"],["矢","","矢","や","","が まとに あたる。"],["刀","むかしの ","刀","かたな","","を みる。"]]}];
+// 九九のとなえ方
+const YOMI=[
+ 'いんいちが いち|いんにが に|いんさんが さん|いんしが し|いんごが ご|いんろくが ろく|いんしちが しち|いんはちが はち|いんくが く',
+ 'にいちが に|ににんが し|にさんが ろく|にしが はち|にご じゅう|にろく じゅうに|にしち じゅうし|にはち じゅうろく|にく じゅうはち',
+ 'さんいちが さん|さんにが ろく|さざんが く|さんし じゅうに|さんご じゅうご|さぶろく じゅうはち|さんしち にじゅういち|さんぱ にじゅうし|さんく にじゅうしち',
+ 'しいちが し|しにが はち|しさん じゅうに|しし じゅうろく|しご にじゅう|しろく にじゅうし|ししち にじゅうはち|しは さんじゅうに|しく さんじゅうろく',
+ 'ごいちが ご|ごに じゅう|ごさん じゅうご|ごし にじゅう|ごご にじゅうご|ごろく さんじゅう|ごしち さんじゅうご|ごは しじゅう|ごっく しじゅうご',
+ 'ろくいちが ろく|ろくに じゅうに|ろくさん じゅうはち|ろくし にじゅうし|ろくご さんじゅう|ろくろく さんじゅうろく|ろくしち しじゅうに|ろくは しじゅうはち|ろっく ごじゅうし',
+ 'しちいちが しち|しちに じゅうし|しちさん にじゅういち|しちし にじゅうはち|しちご さんじゅうご|しちろく しじゅうに|しちしち しじゅうく|しちは ごじゅうろく|しちく ろくじゅうさん',
+ 'はちいちが はち|はちに じゅうろく|はちさん にじゅうし|はちし さんじゅうに|はちご しじゅう|はちろく しじゅうはち|はちしち ごじゅうろく|はっぱ ろくじゅうし|はっく しちじゅうに',
+ 'くいちが く|くに じゅうはち|くさん にじゅうしち|くし さんじゅうろく|くご しじゅうご|くろく ごじゅうし|くしち ろくじゅうさん|くは しちじゅうに|くく はちじゅういち'
+].map(s=>s.split('|'));
+const MON=['👾','🐲','👹','👻','🦖','🐙','🦂','🕷️','🦇','🐍','🦈','🐊','🦑','🧟','👺','🤖','🦍','🐗','🦅','🐯','🦁','🐉','☃️','🎃','🧛','🦏','🐺'];
+const PRAISE=['せいかい！','やったね！','すごい！','そのちょうし！','ばっちり！'];
+
+const $=document.getElementById('app');
+const KEY='ninen-quiz-v1',N=5,GOAL=3,BOSS_HP=8,HEARTS=3;
+let st={v:1,q:{},days:{},boss:{},set:{},ts:0},lsOK=false,idbOK=false,screen='home';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const rec0=k=>st.q[k]||{r:0,w:0,s:0,m:0};
+function today(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function valid(s){return !!(s&&s.v===1&&s.q&&s.days)}
+function norm(s){s.boss=s.boss||{};s.set=s.set||{};return s}
+
+/* ---- 保存：localStorage と IndexedDB の両方に書き、新しいほうを読む ---- */
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(valid(s))st=norm(s);
+  localStorage.setItem('nq-test','1');lsOK=localStorage.getItem('nq-test')==='1'}catch(e){}
+let dbp=null;
+function odb(){if(!dbp)dbp=new Promise((res,rej)=>{try{const r=indexedDB.open('ninenquiz',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});return dbp}
+function idbGet(){return odb().then(db=>new Promise((res,rej)=>{const r=db.transaction('kv').objectStore('kv').get(KEY);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))}
+function idbPut(v){return odb().then(db=>new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,KEY);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)}))}
+function save(){st.ts=Date.now();const j=JSON.stringify(st);
+  try{localStorage.setItem(KEY,j);lsOK=true}catch(e){lsOK=false}
+  idbPut(j).then(()=>{idbOK=true},()=>{idbOK=false})}
+idbGet().then(j=>{idbOK=true;let s=null;try{s=JSON.parse(j||'null')}catch(e){}
+  if(valid(s)&&s.ts>(st.ts||0)){st=norm(s);try{localStorage.setItem(KEY,j)}catch(e){}}
+  else if(st.ts)idbPut(JSON.stringify(st)).catch(()=>{});
+  if(screen==='home')home();else if(screen==='rec')records()},()=>{idbOK=false;if(screen==='home')home()});
+
+/* ---- 問題 ---- */
+const ENT=[],UNITS=[];
+KANJI.forEach((u,ui)=>{const es=u.k.map(x=>({u:ui,k:x[0],pre:x[1],stem:x[2],sr:x[3],oku:x[4],post:x[5]}));
+  es.forEach(e=>ENT.push(e));const qs=[];
+  es.forEach(e=>{qs.push({key:'r:'+e.k,type:'r',u:ui,e});qs.push({key:'w:'+e.k,type:'w',u:ui,e})});
+  UNITS.push({id:'k'+ui,g:'k',t:u.t,e:u.e,qs})});
+for(let a=1;a<=9;a++){const ui=UNITS.length,qs=[];
+  for(let b=1;b<=9;b++)qs.push({key:'m:'+a+'x'+b,type:'m',u:ui,a,b});
+  UNITS.push({id:'m'+a,g:'m',t:a+'のだん',e:String(a),qs})}
+const GROUPS={k:'かんじ',m:'九九'};
+const every=g=>UNITS.reduce((a,u)=>(!g||u.g===g)?a.concat(u.qs):a,[]);
+const same=q=>q.e?q.e.k:q.key;   // 同じ字のよみ・かきは1回の中で重ねない
+const ans=q=>q.type==='r'?q.e.sr+q.e.oku:q.type==='w'?q.e.stem:String(q.a*q.b);
+// 送りがなの形：ようす（〜い）、うごき（〜う段）、そのほか（名前のことば）
+const kind=o=>/い$/.test(o)?'a':/[うくすつぬむるぐぶ]$/.test(o)?'v':'n';
+function opts(q){
+  if(q.type==='m'){const c=q.a*q.b,s=new Set();
+    [[q.a,q.b-1],[q.a,q.b+1],[q.a-1,q.b],[q.a+1,q.b]].forEach(([x,y])=>{if(x>=1&&x<=9&&y>=1&&y<=9&&x*y!==c)s.add(x*y)});
+    [c+1,c-1,c+2,c+10].forEach(v=>{if(s.size<2&&v>0&&v!==c)s.add(v)});
+    return [c].concat(shuf([...s]).slice(0,2)).sort((x,y)=>x-y).map(String)}
+  const e=q.e,r=q.type==='r',full=o=>o.sr+o.oku;
+  const cand=ENT.filter(o=>o!==e&&(r?full(o)!==full(e):(o.sr!==e.sr&&o.stem!==e.stem)));
+  const score=o=>{let s=Math.random()*2;
+    if(o.oku===e.oku)s+=r?8:3;else if(kind(o.oku)===kind(e.oku))s+=r?4:2;
+    if(o.u===e.u)s+=1.5;
+    if(r){if(Math.abs(full(o).length-full(e).length)<=1)s+=1}else if(o.stem.length===e.stem.length)s+=8;
+    return s};
+  const out=[ans(q)];
+  cand.map(o=>[score(o),o]).sort((x,y)=>y[0]-x[0]).some(([,o])=>{const v=r?full(o):o.stem;if(!out.includes(v))out.push(v);return out.length===3});
+  return shuf(out)}
+function label(q){return q.type==='r'?'いろの ついた かんじは、なんと よむかな？':q.type==='w'?'いろの ついた ところを、かんじで かくと どれかな？':'こたえは どれかな？'}
+function body(q,done){
+  if(q.type==='m')return `<p class="sent num">${q.a} × ${q.b} ＝ <mark class="${done?'done':''}">${done?q.a*q.b:'？'}</mark></p><p class="yomi">${done?esc(YOMI[q.a-1][q.b-1]):''}</p>`;
+  const e=q.e;let mid;
+  if(done)mid=`<mark class="done"><ruby class="kj">${esc(e.stem)}<rt>${esc(e.sr)}</rt></ruby></mark>${esc(e.oku)}`;
+  else if(q.type==='r')mid=`<mark class="kj">${esc(e.stem+e.oku)}</mark>`;
+  else mid=`<mark>${esc(e.sr)}</mark>${esc(e.oku)}`;
+  return `<p class="sent">${esc(e.pre)}${mid}${esc(e.post)}</p>`}
+function voice(q,done){if(q.type==='m')return done?YOMI[q.a-1][q.b-1]:q.a+' かける '+q.b+' は？';
+  if(q.type==='r'&&!done)return '';const e=q.e;return e.pre+e.sr+e.oku+e.post}
+function plain(q){if(q.type==='m')return q.a+' × '+q.b+' ＝ '+q.a*q.b;const e=q.e;
+  return e.pre+'【'+e.stem+e.oku+'】'+e.post+'　'+(q.type==='r'?'よみ：'+e.sr+e.oku:'かき：'+e.stem)}
+
+/* ---- よみあげ ---- */
+const canSpeak='speechSynthesis' in window&&'SpeechSynthesisUtterance' in window;
+const ttsOn=()=>canSpeak&&st.set.tts!==false;
+function speak(t){if(!t||!ttsOn())return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+function hush(){try{if(canSpeak)speechSynthesis.cancel()}catch(e){}}
+
+/* ---- きろく ---- */
+function mark(q,ok){const k=q.key,r=Object.assign({},rec0(k));
+  if(ok){r.r++;r.s++;if(r.s>=2)r.m=0}else{r.w++;r.s=0;r.m=1}
+  r.t=Date.now();st.q[k]=r;const d=today(),g=st.days[d]||[0,0,0];g[0]++;if(ok)g[1]++;st.days[d]=g;save()}
+function stamp(){const d=today(),g=st.days[d]||[0,0,0];g[2]=(g[2]||0)+1;st.days[d]=g;save()}
+function unitStat(u){let c=0,m=0,a=0,ok=0,ev=0;const qs=UNITS[u].qs,n=qs.length;
+  qs.forEach(q=>{const x=rec0(q.key);if(x.r)c++;if(x.m)m++;if(x.r+x.w){a++;if(x.s>0)ok++}if(x.w)ev++});
+  return {n,c,m,a,ok,ev,rate:a?Math.round(ok/a*100):null}}
+function totals(g){const t={n:0,c:0,m:0,a:0,ok:0,ev:0};UNITS.forEach((u,i)=>{if(g&&u.g!==g)return;const s=unitStat(i);for(const k in t)t[k]+=s[k]});
+  t.rate=t.a?Math.round(t.ok/t.a*100):null;return t}
+const pending=()=>every().filter(q=>rec0(q.key).m);
+const rounds=d=>(st.days[d]||[])[2]||0;
+function allStamps(){return Object.keys(st.days).reduce((a,d)=>a+rounds(d),0)}
+function streak(){let n=0;const d=new Date();if(!rounds(today(d)))d.setDate(d.getDate()-1);
+  while(rounds(today(d))){n++;d.setDate(d.getDate()-1)}return n}
+const beaten=u=>st.boss[UNITS[u].id]||0;
+const lockLeft=u=>{const s=unitStat(u);return s.n-s.c};
+function whereSaved(){return lsOK||idbOK?'きろくは この iPad（たんまつ）に ほぞんされます':'この たんまつでは きろくを ほぞんできません。とじると きろくが きえます'}
+
+/* ---- 出題のえらび方 ---- */
+function uniq(order,n){const out=[],used=new Set();
+  for(const q of order){if(used.has(same(q)))continue;used.add(same(q));out.push(q);if(out.length===n)return out}
+  for(const q of order){if(out.length>=n)break;if(!out.includes(q))out.push(q)}return out}
+function pick(u){const a=UNITS[u].qs,R=q=>rec0(q.key);
+  const pe=shuf(a.filter(q=>R(q).m)),fresh=a.filter(q=>!R(q).m&&!R(q).r);
+  const rest=a.filter(q=>!R(q).m&&R(q).r).sort((x,y)=>(R(x).t||0)-(R(y).t||0));
+  // 復習まちを最大2問まぜ、のこりは「よみ → かき」の順にまだの問題から
+  return shuf(uniq(pe.slice(0,2).concat(fresh.filter(q=>q.type!=='w'),fresh.filter(q=>q.type==='w'),pe.slice(2),rest),N))}
+function start(u){run(pick(u),UNITS[u].t,u)}
+function next(g){const i=UNITS.findIndex((u,k)=>u.g===g&&(lockLeft(k)||unitStat(k).m));
+  if(i>=0)return start(i);run(uniq(shuf(every(g)),N),GROUPS[g]+' ミックス',null,g)}
+function review(){const p=pending().sort((a,b)=>rec0(b.key).w-rec0(a.key).w||(rec0(a.key).t||0)-(rec0(b.key).t||0));
+  if(p.length)run(shuf(uniq(p,N)),'ふくしゅう',null,null,true)}
+
+/* ---- ホーム ---- */
+function unitCard(u,k){const s=unitStat(k),full=s.c===s.n;
+  return `<button class="unit ${u.g}" data-u="${k}">${u.g==='m'?`<span class="num">${u.e}</span>`:`<span class="em">${u.e}</span>`}<b>${esc(u.t)}</b><small>${s.c} / ${s.n} もん クリア</small>${s.m?`<span class="badge">ふくしゅう ${s.m}</span>`:full?'<span class="done">⭐</span>':''}<div class="meter"><i style="width:${Math.round(s.c/s.n*100)}%"></i></div></button>`}
+function home(){
+  screen='home';hush();const r=rounds(today()),pe=pending().length,won=UNITS.filter((_,k)=>beaten(k)).length;
+  const slots=Math.max(GOAL,Math.min(r,10));let sp='';for(let i=0;i<slots;i++)sp+=`<span class="${i<r?'on':''}">${i<r?'💮':''}</span>`;
+  const tk=totals('k'),tm=totals('m');
+  let h=`<div class="head"><h1>2年生 かんじ・九九クイズ</h1><button class="link" id="rc">おうちの方へ</button></div>
+  <div class="stampbox"><b>きょうの スタンプ</b><div class="stamps">${sp}</div>${r>10?`<b>+${r-10}</b>`:''}
+  <div class="cnt"><span>ぜんぶで <i>${allStamps()}</i> こ</span><span>れんぞく <i>${streak()}</i> 日</span></div></div>
+  ${lsOK||idbOK?'':`<p class="alert">${whereSaved()}。</p>`}
+  ${pe?`<div class="bar"><button class="btn rev" id="rev">🔁 まちがえた もんだいを ふくしゅう（${pe}もん）</button></div>`:''}
+  <h2>✏️ かんじ <small>${tk.c} / ${tk.n} もん クリア</small></h2>
+  <div class="bar"><button class="btn pri big" data-g="k">▶ かんじを ${N}もん</button></div>
+  <div class="units">${UNITS.map((u,k)=>u.g==='k'?unitCard(u,k):'').join('')}</div>
+  <h2>✖️ 九九 <small>${tm.c} / ${tm.n} もん クリア</small></h2>
+  <div class="bar"><button class="btn kk big" data-g="m">▶ 九九を ${N}もん</button><button class="btn" id="mmix">九九 ミックス</button></div>
+  <div class="units">${UNITS.map((u,k)=>u.g==='m'?unitCard(u,k):'').join('')}</div>
+  <h2>👾 ボスバトル <small>たおした かず ${won} / ${UNITS.length}</small></h2>
+  <p class="alert" id="lk" hidden></p>
+  <div class="bosses">${UNITS.map((u,k)=>{const b=beaten(k),l=lockLeft(k);
+    return `<button class="bz ${b?'won':'off'} ${l?'lock':b?'':'ready'}" data-b="${k}"><span>${MON[k%MON.length]}</span><small>${esc(u.t)}${b?'<br>'+'★'.repeat(Math.min(3,b)):l?'<br>🔒 あと'+l+'もん':'<br>たたかう！'}</small></button>`}).join('')}</div>
+  <p class="note">1かい ${N}もん。おわると スタンプが 1こ もらえるよ。まとまりの もんだいを ぜんぶ クリアすると、ボスと たたかえるよ。</p>`;
+  $.innerHTML=h;
+  $.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>start(+b.dataset.u));
+  $.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>next(b.dataset.g));
+  document.getElementById('mmix').onclick=()=>run(uniq(shuf(every('m')),N),'九九 ミックス',null,'mix');
+  document.getElementById('rc').onclick=()=>records();
+  if(pe)document.getElementById('rev').onclick=review;
+  $.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{const k=+b.dataset.b,n=lockLeft(k);if(!n)return boss(k);
+    const e=document.getElementById('lk');e.hidden=false;e.textContent='🔒 「'+UNITS[k].t+'」の ボスと たたかうには、あと '+n+'もん クリアしよう。';e.scrollIntoView({block:'nearest'})});
+  window.scrollTo(0,0)}
+
+/* ---- もんだいを出す（共通） ---- */
+// #qa に選択肢を出し、答えたら done(正解か) を1回だけ呼ぶ
+function ask(q,done){
+  const el=document.getElementById('qa'),os=opts(q),a=ans(q);let fin=false;
+  const cls=q.type==='w'?'kj':q.type==='m'?'n':os.some(o=>o.length>5)?'long':'';
+  el.innerHTML=os.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(o)}</button>`).join('');
+  const bs=[...el.querySelectorAll('.opt')];
+  bs.forEach((b,i)=>b.onclick=()=>{if(fin)return;fin=true;const ok=os[i]===a;
+    bs.forEach((c,j)=>{c.disabled=true;if(os[j]===a)c.classList.add('ok')});if(!ok)b.classList.add('ng');
+    document.getElementById('qs').innerHTML=body(q,true);spk(q,true);
+    const m=document.getElementById('ms');m.className='msg '+(ok?'ok':'ng');
+    m.textContent=ok?'⭕ '+PRAISE[Math.floor(Math.random()*PRAISE.length)]:'❌ こたえは「'+a+'」だよ';done(ok)})}
+function spk(q,done){const el=document.getElementById('sp'),t=voice(q,done);
+  el.innerHTML=t&&ttsOn()?'<button id="sb">🔊 きく</button>':'';if(t&&ttsOn())document.getElementById('sb').onclick=()=>speak(t)}
+function qcard(q,extra){return `<div class="card">${extra||''}<p class="ask">${label(q)}</p><div id="qs">${body(q,false)}</div><div class="spk" id="sp"></div><div class="opts" id="qa"></div><p class="msg" id="ms"></p><div class="bar ctr"><button class="btn pri big" id="nx" hidden>つぎへ ▶</button></div></div>`}
+
+function run(qs,title,u,g,isRev){
+  if(!qs.length)return home();
+  screen='run';qs=qs.slice();const base=qs.length,log=[];let k=0,score=0;
+  function show(){const q=qs[k];
+    let dots='';for(let i=0;i<base;i++)dots+=`<i class="${log[i]==null?(i===k?'now':''):log[i]?'ok':'ng'}"></i>`;
+    $.innerHTML=`<div class="top"><button class="back" id="bk">← やめる</button><span class="ttl">${esc(title)}</span><div class="dots">${dots}</div></div>`
+      +qcard(q,q.re?'<p style="text-align:center;margin:0 0 6px"><span class="tag">もういちど ちょうせん</span></p>':'');
+    document.getElementById('bk').onclick=home;spk(q,false);
+    ask(q,ok=>{mark(q,ok);if(!q.re){log[k]=ok;if(ok)score++;else qs.push(Object.assign({},q,{re:1}))}
+      const nx=document.getElementById('nx');nx.hidden=false;nx.onclick=()=>{hush();k++;k<qs.length?show():result()}});
+    window.scrollTo(0,0)}
+  function result(){
+    screen='res';stamp();const r=rounds(today());
+    let stars='';for(let i=0;i<base;i++)stars+=i<score?'★':'<i>★</i>';
+    const bossReady=u!=null&&!lockLeft(u)&&!beaten(u);
+    $.innerHTML=`<div class="card res"><div class="stamp">💮</div><h1>スタンプ ゲット！</h1>
+    <p class="sc">${base}もん中 ${score}もん せいかい${score===base?'　ぜんぶ せいかい！':''}</p><div class="star">${stars}</div>
+    <p class="sc">きょうの スタンプ ${r}こ${r===GOAL?'　もくひょう たっせい！🎉':''}</p>
+    ${bossReady?`<p class="alert">「${esc(UNITS[u].t)}」を ぜんぶ クリア！ ボスが あらわれた！</p>`:''}
+    <div class="bar ctr">${bossReady?`<button class="btn rev big" id="bs">${MON[u%MON.length]} ボスと たたかう</button>`:''}
+    <button class="btn pri big" id="ag">もう ${N}もん</button><button class="btn big" id="hm">おわる</button></div></div>`;
+    document.getElementById('hm').onclick=home;
+    if(bossReady)document.getElementById('bs').onclick=()=>boss(u);
+    document.getElementById('ag').onclick=()=>{
+      if(isRev&&pending().length)return review();
+      if(g==='mix')return run(uniq(shuf(every('m')),N),'九九 ミックス',null,'mix');
+      if(u!=null&&(lockLeft(u)||unitStat(u).m))return start(u);
+      next(u!=null?UNITS[u].g:g||'k')};
+    window.scrollTo(0,0)}
+  show()}
+
+/* ---- ボスバトル ---- */
+function boss(u){
+  screen='boss';const U=UNITS[u],mon=MON[u%MON.length];let hp=BOSS_HP,life=HEARTS,pool=[];
+  function draw(){if(!pool.length)pool=shuf(U.qs);return pool.pop()}
+  function arena(cls){return `<div class="arena"><div class="bname">${esc(U.t)}の ボス</div><div class="face ${cls||''}" id="fc">${mon}</div>
+    <div class="hp"><i style="width:${hp/BOSS_HP*100}%"></i></div><div class="hearts">${'❤️'.repeat(life)}${'🤍'.repeat(HEARTS-life)}</div></div>`}
+  function show(){const q=draw();
+    $.innerHTML=`<div class="top"><button class="back" id="bk">← にげる</button><span class="ttl">ボスバトル</span><span></span></div><div id="ar">${arena()}</div>`+qcard(q);
+    document.getElementById('bk').onclick=home;spk(q,false);
+    ask(q,ok=>{mark(q,ok);if(ok)hp--;else life--;
+      document.getElementById('ar').innerHTML=arena(ok?(hp?'hit':'down'):'');
+      const nx=document.getElementById('nx');nx.hidden=false;
+      nx.textContent=!hp?'やった！ ▶':!life?'つぎへ ▶':ok?'こうげき！ ▶':'つぎへ ▶';
+      nx.onclick=()=>{hush();(!hp||!life)?end(!hp):show()}});
+    window.scrollTo(0,0)}
+  function end(win){
+    if(win){st.boss[U.id]=beaten(u)+1;save()}
+    $.innerHTML=`<div class="card res"><div class="stamp">${win?mon:'💦'}</div><h1>${win?'ボスを たおした！':'ざんねん…'}</h1>
+    <p class="sc">${win?'「'+esc(U.t)+'」の ボスが ずかんに はいったよ。'+'★'.repeat(Math.min(3,beaten(u))):'もういちど れんしゅうして、また ちょうせんしよう。'}</p>
+    <div class="bar ctr"><button class="btn ${win?'':'pri'} big" id="ag">${win?'もういちど たたかう':'もういちど'}</button>${win?'':`<button class="btn big" id="pr">れんしゅうする</button>`}<button class="btn ${win?'pri':''} big" id="hm">おわる</button></div></div>`;
+    document.getElementById('hm').onclick=home;document.getElementById('ag').onclick=()=>boss(u);
+    if(!win)document.getElementById('pr').onclick=()=>start(u);window.scrollTo(0,0)}
+  show()}
+
+/* ---- おうちの方へ（きろく） ---- */
+function records(){
+  screen='rec';hush();const t=totals(),g=st.days[today()]||[0,0,0];
+  const days=[];for(let i=0;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const k=today(d),v=st.days[k];if(v)days.push([k,v])}
+  const wrong=every().filter(q=>rec0(q.key).w>0).sort((a,b)=>rec0(b.key).w-rec0(a.key).w);
+  let h=`<div class="top"><button class="back" id="bk">← もどる</button><span></span></div><div class="pa"><h1>おうちの方へ</h1>
+  <div class="stats"><div><b>${g[0]}</b><small>今日といた数</small></div><div><b>${g[0]?Math.round(g[1]/g[0]*100)+'%':'–'}</b><small>今日の正答率</small></div>
+  <div><b>${t.c} / ${t.n}</b><small>クリアした問題</small></div><div><b>${t.m}</b><small>復習待ちの問題</small></div></div>
+  <p class="${lsOK||idbOK?'okline':'alert'}">${lsOK||idbOK?'記録はこの端末の中だけに保存されます（ログイン不要・外部送信なし）。':'この端末では記録を保存できません。'}</p>
+  <h2>日ごとの記録（直近14日）</h2>${days.length?`<table><tr><th>日付</th><th class="r">回数（スタンプ）</th><th class="r">といた数</th><th class="r">正解</th><th class="r">正答率</th></tr>
+  ${days.map(([k,v])=>`<tr><td>${k}</td><td class="r">${v[2]||0}</td><td class="r">${v[0]}</td><td class="r">${v[1]}</td><td class="r">${v[0]?Math.round(v[1]/v[0]*100)+'%':'–'}</td></tr>`).join('')}</table>`:'<p>まだ記録がありません。</p>'}
+  <h2>まとまりごとの進み具合</h2><table><tr><th>まとまり</th><th class="r">クリア</th><th class="r">正答率</th><th class="r">復習待ち</th><th class="r">ボス</th></tr>
+  ${UNITS.map((u,k)=>{const s=unitStat(k);return `<tr><td>${u.g==='k'?'かんじ：':'九九：'}${esc(u.t)}</td><td class="r">${s.c} / ${s.n}</td><td class="r">${s.rate==null?'–':s.rate+'%'}</td><td class="r ${s.m?'ngc':''}">${s.m||'–'}</td><td class="r">${beaten(k)?'★'.repeat(Math.min(3,beaten(k))):'–'}</td></tr>`}).join('')}</table>
+  <p class="note" style="margin-top:6px">クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
+  <h2>まちがえたことのある問題（${wrong.length}問）</h2>${wrong.length?`<table><tr><th>問題</th><th class="r">まちがい</th><th class="r">正解</th><th class="r">いま</th></tr>
+  ${wrong.map(q=>{const x=rec0(q.key);return `<tr><td>${esc(plain(q))}</td><td class="r ngc">${x.w}</td><td class="r">${x.r}</td><td class="r">${x.m?'復習待ち':'○'}</td></tr>`}).join('')}</table>`:'<p>まだありません。</p>'}
+  <h2>設定</h2>
+  <div class="bar">${canSpeak?`<button class="btn sm" id="tt">読み上げボタン：${ttsOn()?'表示する':'表示しない'}</button>`:'<span class="note" style="margin:0">この端末では読み上げが使えません。</span>'}</div>
+  <h2>記録のバックアップ</h2>
+  <p>下の文字列をコピーして保存しておくと、あとで「読みこむ」で記録を戻せます。</p>
+  <div class="bar"><button class="btn sm" id="ex">記録を書き出す</button><button class="btn sm" id="im">貼りつけた記録を読みこむ</button><button class="btn sm" id="rs">記録をすべて消す</button><button class="btn sm rev" id="rs2" hidden>本当に消す（元に戻せません）</button></div>
+  <textarea id="tx" placeholder="ここに記録の文字列が出ます／貼りつけます"></textarea><p class="okline" id="bm"></p>
+  <h2>このクイズについて</h2>
+  <p>かんじは、小学2年生で習う160字を1字につき「よみ」「かき」の2問ずつ（320問）。意味の近い字で18のまとまりに分けてあり、教科書の順番とは一致しません。例文に使う漢字は2年生までに習う字だけです。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。</p></div>`;
+  $.innerHTML=h;
+  document.getElementById('bk').onclick=home;
+  if(canSpeak)document.getElementById('tt').onclick=()=>{st.set.tts=!ttsOn();save();records()};
+  const tx=document.getElementById('tx'),bm=document.getElementById('bm');
+  document.getElementById('ex').onclick=()=>{tx.value=JSON.stringify(st);tx.select();bm.textContent='書き出しました。全体をコピーして、メモなどに保存してください。'};
+  document.getElementById('im').onclick=()=>{let s=null;try{s=JSON.parse(tx.value)}catch(e){}
+    if(!valid(s)){bm.textContent='読みこめませんでした。書き出した文字列をそのまま貼りつけてください。';return}
+    st=norm(s);save();records();document.getElementById('bm').textContent='読みこみました。'};
+  document.getElementById('rs').onclick=()=>{document.getElementById('rs2').hidden=false};
+  document.getElementById('rs2').onclick=()=>{st={v:1,q:{},days:{},boss:{},set:st.set,ts:0};save();records();document.getElementById('bm').textContent='記録を消しました。'};
+  window.scrollTo(0,0)}
+
+home();
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
