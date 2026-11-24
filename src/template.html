@@ -24,7 +24,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 h1{font-size:1.5rem;margin:0}
 h2{font-size:1.2rem;margin:26px 0 10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 h2 small{font-size:.85rem;color:var(--sub);font-weight:600}
-.head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.head{display:flex;justify-content:space-between;align-items:center;gap:8px 10px;flex-wrap:wrap}
+.head h1{white-space:nowrap}
+.hb{display:flex;gap:8px;flex:none;margin-left:auto}
 .link{white-space:nowrap;flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-size:.85rem;font-weight:700;color:var(--sub)}
 .stampbox{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:12px 16px;margin:14px 0;display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap}
 .cur{display:flex;align-items:center;gap:10px}
@@ -258,6 +260,29 @@ const ttsOn=()=>canSpeak&&st.set.tts!==false;
 function speak(t){if(!t||!ttsOn())return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
 function hush(){try{if(canSpeak)speechSynthesis.cancel()}catch(e){}}
 
+/* ---- こうかおん：ファイルを使わず、その場で音を合成する ---- */
+let actx=null;
+const sndOn=()=>st.set.snd!==false;
+function ac(){if(!sndOn())return null;try{if(!actx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;actx=new C()}
+  if(actx.state==='suspended')actx.resume();return actx}catch(e){return null}}
+// [高さHz, 開始秒, 長さ秒, 波形, 音量]
+const SND={
+ start:[[523,0,.07],[784,.07,.11]],
+ tap:[[700,0,.035,'square',.04]],
+ ok:[[988,0,.08],[1319,.08,.18]],
+ ng:[[185,0,.13,'sawtooth',.09],[139,.12,.24,'sawtooth',.09]],
+ out:[[330,0,.1,'sawtooth',.09],[220,.1,.1,'sawtooth',.09],[147,.2,.28,'sawtooth',.09]],
+ time:[[1175,0,.05,'square',.05]],
+ hit:[[247,0,.05,'sawtooth',.1],[988,.04,.07],[1319,.1,.14]],
+ combo:[[784,0,.06],[988,.06,.06],[1175,.12,.06],[1568,.18,.2]],
+ grow:[[659,0,.09],[784,.09,.09],[988,.18,.09],[1319,.27,.26]],
+ adult:[[523,0,.11],[523,.13,.05],[523,.19,.05],[659,.25,.11],[784,.37,.11],[1047,.49,.13],[784,.63,.08],[1047,.72,.14],[1319,.87,.45]],
+ win:[[523,0,.09],[659,.09,.09],[784,.18,.09],[1047,.27,.09],[1319,.36,.09],[1568,.45,.4]],
+ lose:[[392,0,.2,'triangle',.2],[330,.2,.2,'triangle',.2],[262,.4,.45,'triangle',.2]]};
+function sfx(n){const a=ac();if(!a)return;try{const t=a.currentTime+.01;SND[n].forEach(([f,t0,d,type,vol])=>{const o=a.createOscillator(),g=a.createGain();
+  o.type=type||'square';o.frequency.setValueAtTime(f,t+t0);g.gain.setValueAtTime(.0001,t+t0);g.gain.linearRampToValueAtTime(vol||.07,t+t0+.012);g.gain.exponentialRampToValueAtTime(.0001,t+t0+d);
+  o.connect(g);g.connect(a.destination);o.start(t+t0);o.stop(t+t0+d+.03)})}catch(e){}}
+
 /* ---- きろく ---- */
 function mark(q,ok){const k=q.key,r=Object.assign({},rec0(k));
   if(ok){r.r++;r.s++;if(r.s>=2)r.m=0}else{r.w++;r.s=0;r.m=1}
@@ -331,7 +356,7 @@ function home(){
   const tot=allStamps(),fl=Math.floor(tot/PET),pet=tot%PET;let got='';
   for(let i=Math.max(0,fl-12);i<fl;i++)got+=tile(PET,46,i);
   const tk=totals('k'),tm=totals('m'),tM=totals('M');
-  let h=`<div class="head"><h1>2年生 かんじ・九九クイズ</h1><button class="link" id="rc">おうちの方へ</button></div>
+  let h=`<div class="head"><h1>2年生 かんじ・九九クイズ</h1><div class="hb"><button class="link" id="sd">${sndOn()?'🔊 おと あり':'🔇 おと なし'}</button><button class="link" id="rc">おうちの方へ</button></div></div>
   <div class="stampbox"><div class="cur">${tile(pet,84,fl)}<div><b>いきものスタンプ <em>${fl}</em> こ</b><small>いまは「${STAGE[pet]}」。あと ${PET-pet}かいで おとなに なるよ</small></div></div>
   <div class="got">${got}${fl>12?`<b>ぜんぶで ${fl}こ</b>`:''}</div>
   <div class="cnt"><span>きょう <i>${r}</i> かい</span><span>れんぞく <i>${streak()}</i> 日</span></div></div>
@@ -356,6 +381,7 @@ function home(){
   $.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>next(b.dataset.g));
   document.getElementById('mmix').onclick=()=>run(uniq(shuf(every('m')),N),'九九 ミックス',null,'mix');
   document.getElementById('rc').onclick=()=>records();
+  document.getElementById('sd').onclick=()=>{st.set.snd=!sndOn();save();sfx('ok');home()};
   if(pe)document.getElementById('rev').onclick=review;
   $.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{const k=+b.dataset.b,n=lockLeft(k);if(!n)return boss(k);
     const e=document.getElementById('lk');e.hidden=false;e.textContent='🔒 「'+UNITS[k].t+'」の ボスと たたかうには、あと '+n+'もん クリアしよう。';e.scrollIntoView({block:'nearest'})});
@@ -374,7 +400,7 @@ function ask(q,done){
     const finish=out=>{if(fin)return;fin=true;ks.forEach(k=>k.disabled=true);end(!out&&v===a,out)};
     ks.forEach(k=>k.onclick=()=>{if(fin)return;const n=k.dataset.n;
       if(n==='ok'){if(v)finish(false);return}
-      if(n==='x')v=v.slice(0,-1);else if(v.length<3)v=(v==='0'?'':v)+n;mk()});
+      sfx('tap');if(n==='x')v=v.slice(0,-1);else if(v.length<3)v=(v==='0'?'':v)+n;mk()});
     return {timeout:()=>finish(true)}}
   const os=opts(q),cls=q.type==='w'?'kj':q.type==='m'?'n':os.some(o=>o.length>5)?'long':'';
   el.className='opts'+(os.length===4?' four':'');
@@ -389,18 +415,18 @@ function qcard(q,extra){return `<div class="card">${extra||''}<p class="ask">${l
 
 function run(qs,title,u,g,isRev){
   if(!qs.length)return home();
-  stopTick();screen='run';qs=qs.slice();const base=qs.length,log=[];let k=0,score=0,row=0;
+  stopTick();screen='run';sfx('start');qs=qs.slice();const base=qs.length,log=[];let k=0,score=0,row=0;
   function show(){const q=qs[k];
     let dots='';for(let i=0;i<base;i++)dots+=`<i class="${log[i]==null?(i===k?'now':''):log[i]?'ok':'ng'}"></i>`;
     $.innerHTML=`<div class="top"><button class="back" id="bk">← やめる</button><span class="ttl">${esc(title)}</span><div class="dots">${dots}</div></div>`
       +qcard(q,q.re?'<p style="text-align:center;margin:0 0 6px"><span class="tag">もういちど ちょうせん</span></p>':'');
     document.getElementById('bk').onclick=home;spk(q,false);
-    ask(q,ok=>{mark(q,ok);if(!q.re){log[k]=ok;if(ok)score++;else qs.push(Object.assign({},q,{re:1}))}
+    ask(q,ok=>{sfx(ok?'ok':'ng');mark(q,ok);if(!q.re){log[k]=ok;if(ok)score++;else qs.push(Object.assign({},q,{re:1}))}
       row=ok?row+1:0;if(row>=3)document.getElementById('ms').textContent+='　🔥 '+row+'もん れんぞく！';
       const nx=document.getElementById('nx');nx.hidden=false;nx.onclick=()=>{hush();k++;k<qs.length?show():result()}});
     window.scrollTo(0,0)}
   function result(){
-    screen='res';stamp();const r=rounds(today()),tot=allStamps(),pet=tot%PET,full=pet===0;
+    screen='res';stamp();const r=rounds(today()),tot=allStamps(),pet=tot%PET,full=pet===0;sfx(full?'adult':'grow');
     let stars='';for(let i=0;i<base;i++)stars+=i<score?'★':'<i>★</i>';
     const bossReady=u!=null&&!lockLeft(u)&&!beaten(u);
     $.innerHTML=`<div class="card res"><div class="stamp">${full?tile(PET,200,tot/PET-1):tile(pet,170,Math.floor(tot/PET))}</div><h1>${full?petOf(tot/PET-1).n+'に そだった！🎉':GROW[pet]}</h1>
@@ -423,7 +449,7 @@ function run(qs,title,u,g,isRev){
 let tick=null;function stopTick(){if(tick){clearInterval(tick);tick=null}}
 function boss(u){
   stopTick();screen='boss';const U=UNITS[u],mon=MON[u%MON.length],hard=lv()===2,HP=hard?10:8,sec=hard?TIME[U.g][Math.min(2,beaten(u))]:0;
-  let hp=HP,life=HEARTS,pool=[],combo=0;
+  let hp=HP,life=HEARTS,pool=[],combo=0;sfx('start');
   function draw(){if(!pool.length)pool=shuf(U.qs);return pool.pop()}
   function arena(cls,live){return `<div class="arena"><div class="bname">${esc(U.t)}の ボス${beaten(u)?'　Lv.'+(Math.min(2,beaten(u))+1):''}</div><div class="face ${cls||''}" id="fc">${mon}</div>
     <div class="hp"><i style="width:${hp/HP*100}%"></i></div><div class="hearts">${'❤️'.repeat(life)}${'🤍'.repeat(HEARTS-life)}</div>
@@ -431,17 +457,19 @@ function boss(u){
   function show(){const q=draw();
     $.innerHTML=`<div class="top"><button class="back" id="bk">← にげる</button><span class="ttl">ボスバトル</span><span></span></div><div id="ar">${arena('',true)}</div>`+qcard(q);
     document.getElementById('bk').onclick=home;spk(q,false);
-    const h=ask(q,ok=>{stopTick();mark(q,ok);if(ok){combo++;hp=Math.max(0,hp-(combo>=3?2:1))}else{combo=0;life--}
+    const h=ask(q,(ok,out)=>{stopTick();mark(q,ok);if(ok){combo++;hp=Math.max(0,hp-(combo>=3?2:1))}else{combo=0;life--}
+      sfx(ok?(combo>=3?'combo':'hit'):out?'out':'ng');
       document.getElementById('ar').innerHTML=arena(ok?(hp?'hit':'down'):'');
       const nx=document.getElementById('nx');nx.hidden=false;
       nx.textContent=!hp?'やった！ ▶':ok?'こうげき！ ▶':'つぎへ ▶';
       nx.onclick=()=>{hush();(!hp||!life)?end(!hp):show()}});
-    if(sec){const t0=Date.now();tick=setInterval(()=>{const b=document.getElementById('tb');if(!b)return stopTick();
+    if(sec){const t0=Date.now();let last=0;tick=setInterval(()=>{const b=document.getElementById('tb');if(!b)return stopTick();
       const left=1-(Date.now()-t0)/(sec*1000);b.style.width=Math.max(0,left*100)+'%';b.className=left<.3?'red':'';
+      const sl=Math.ceil(left*sec);if(sl>0&&sl<=3&&sl!==last){last=sl;sfx('time')}
       if(left<=0){stopTick();h.timeout()}},100)}
     window.scrollTo(0,0)}
   function end(win){
-    stopTick();if(win){st.boss[U.id]=beaten(u)+1;save()}
+    stopTick();sfx(win?'win':'lose');if(win){st.boss[U.id]=beaten(u)+1;save()}
     $.innerHTML=`<div class="card res"><div class="stamp">${win?mon:'💦'}</div><h1>${win?'ボスを たおした！':'ざんねん…'}</h1>
     <p class="sc">${win?'「'+esc(U.t)+'」の ボスが ずかんに はいったよ。'+'★'.repeat(Math.min(3,beaten(u))):'もういちど れんしゅうして、また ちょうせんしよう。'}</p>
     ${win&&hard&&beaten(u)<3?'<p class="sc">つぎは ボスが レベルアップ！ じかんが みじかく なるよ。</p>':''}
@@ -469,7 +497,7 @@ function records(){
   <h2>設定</h2>
   <div class="bar"><button class="btn sm" id="lv">むずかしさ：${lv()===2?'むずかしい':'ふつう'}</button></div>
   <p class="note" style="margin:0 0 8px">むずかしい＝かんじは4択で、かき問題に形のにた字がまざります。計算は答えの数字を入力します。ボスは時間制限つきで、たおすたびに短くなります。ふつう＝すべて3択、時間制限なし。</p>
-  <div class="bar">${canSpeak?`<button class="btn sm" id="tt">読み上げボタン：${ttsOn()?'表示する':'表示しない'}</button>`:'<span class="note" style="margin:0">この端末では読み上げが使えません。</span>'}</div>
+  <div class="bar"><button class="btn sm" id="sn">効果音：${sndOn()?'あり':'なし'}</button>${canSpeak?`<button class="btn sm" id="tt">読み上げボタン：${ttsOn()?'表示する':'表示しない'}</button>`:'<span class="note" style="margin:0">この端末では読み上げが使えません。</span>'}</div>
   <h2>記録のバックアップ</h2>
   <p>下の文字列をコピーして保存しておくと、あとで「読みこむ」で記録を戻せます。</p>
   <div class="bar"><button class="btn sm" id="ex">記録を書き出す</button><button class="btn sm" id="im">貼りつけた記録を読みこむ</button><button class="btn sm" id="rs">記録をすべて消す</button><button class="btn sm rev" id="rs2" hidden>本当に消す（元に戻せません）</button></div>
@@ -479,6 +507,7 @@ function records(){
   $.innerHTML=h;
   document.getElementById('bk').onclick=home;
   document.getElementById('lv').onclick=()=>{st.set.lv=lv()===2?1:2;save();records()};
+  document.getElementById('sn').onclick=()=>{st.set.snd=!sndOn();save();sfx('ok');records()};
   if(canSpeak)document.getElementById('tt').onclick=()=>{st.set.tts=!ttsOn();save();records()};
   const tx=document.getElementById('tx'),bm=document.getElementById('bm');
   document.getElementById('ex').onclick=()=>{tx.value=JSON.stringify(st);tx.select();bm.textContent='書き出しました。全体をコピーして、メモなどに保存してください。'};
