@@ -8,11 +8,11 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="2年クイズ">
+<meta name="apple-mobile-web-app-title" content="クイズ">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#fff6e6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1b1a18" media="(prefers-color-scheme: dark)">
-<title>2年生 かんじ・九九クイズ</title>
+<title>かんじ・けいさん クイズ</title>
 <style>
 :root{--bg:#fff6e6;--card:#fff;--ink:#3b2f28;--sub:#85766a;--line:#eedfc8;--acc:#ef6f2e;--acc2:#ffe9d9;--kk:#1f9a8c;--kk2:#dcf3ef;--ok:#23944f;--okbg:#e2f6e8;--ng:#d94a36;--ngbg:#fde8e3;--gold:#f0ac1c;--hole:#fff1b8}
 @media(prefers-color-scheme:dark){:root{--bg:#1b1a18;--card:#282623;--ink:#f3ece2;--sub:#b0a597;--line:#423d36;--acc:#ff9a62;--acc2:#45301f;--kk:#5fd0c1;--kk2:#1d3a36;--ok:#63d391;--okbg:#1e3a29;--ng:#ff8f7d;--ngbg:#45231e;--gold:#f6c24f;--hole:#5a4a12}}
@@ -249,7 +249,7 @@ SDEF.forEach((d,i)=>{const r=rng(101+i),ui=UNITS.length,qs=[],seen=new Set();
     if(x<1||st2.some(v=>v<0)||c>100||c<1||seen.has(key))continue;seen.add(key);qs.push({key,type:'s',u:ui,t,x,c})}
   UNITS.push({id:'s'+i,g:'S',t:d.t,e:d.e,qs})});
 KANJI.filter(u=>(u.g||'k')!=='k').forEach(addKanji);
-const GROUPS={k:'2年生の かんじ',j:'じゅくご',c:'3年生の かんじ',m:'九九',M:'19×19',S:'□の けいさん'};
+const GROUPS={k:'かんじ 1',j:'じゅくご',c:'かんじ 2',m:'九九',M:'19×19',S:'□の けいさん'};
 const isK=g=>g==='k'||g==='j'||g==='c';
 const B=v=>v==null?'□':v;
 const expr=(t,c,x)=>t.map(v=>v==null?(x==null?'□':x):v).join(' ')+' ＝ '+c;
@@ -427,7 +427,7 @@ function home(){
   const tot=allStamps(),fl=Math.floor(tot/PET),pet=tot%PET;let got='';
   for(let i=Math.max(0,fl-12);i<fl;i++)got+=tile(PET,46,i);
   const fb=folded('boss');
-  let h=`<div class="head"><h1>2年生 かんじ・九九クイズ</h1><div class="hb"><button class="link" id="sd">${sndOn()?'🔊 おと あり':'🔇 おと なし'}</button><button class="link" id="rc">おうちの方へ</button></div></div>
+  let h=`<div class="head"><h1>かんじ・けいさん クイズ</h1><div class="hb"><button class="link" id="sd">${sndOn()?'🔊 おと あり':'🔇 おと なし'}</button><button class="link" id="rc">おうちの方へ</button></div></div>
   <div class="stampbox"><div class="cur">${tile(pet,84,fl)}<div><b>いきものスタンプ <em>${fl}</em> こ</b><small>いまは「${STAGE[pet]}」。あと ${PET-pet}かいで おとなに なるよ</small></div></div>
   <div class="got">${got}${fl>12?`<b>ぜんぶで ${fl}こ</b>`:''}</div>
   <div class="cnt"><span>きょう <i>${r}</i> かい</span><span>れんぞく <i>${streak()}</i> 日</span></div></div>
@@ -437,7 +437,7 @@ function home(){
   <h2 class="sh" data-f="boss"><span class="chev">${fb?'▶':'▼'}</span><span>👾 ボスバトル</span><small>たおした かず ${won} / ${UNITS.length}</small></h2>
   ${fb?'':`<p class="alert" id="lk" hidden></p>
   <div class="bosses">${UNITS.map((u,k)=>{const b=beaten(k),l=lockLeft(k);
-    return `<button class="bz ${b?'won':'off'} ${l?'lock':b?'':'ready'}" data-b="${k}"><span>${MON[k%MON.length]}</span><small>${isK(u.g)&&u.g!=='k'?(u.g==='j'?'じゅくご':'3年')+'<br>':''}${esc(u.t)}${b?'<br>'+'★'.repeat(Math.min(3,b)):l?'<br>🔒 あと'+l+'もん':'<br>たたかう！'}</small></button>`}).join('')}</div>`}
+    return `<button class="bz ${b?'won':'off'} ${l?'lock':b?'':'ready'}" data-b="${k}"><span>${MON[k%MON.length]}</span><small>${isK(u.g)&&u.g!=='k'?GROUPS[u.g]+'<br>':''}${esc(u.t)}${b?'<br>'+'★'.repeat(Math.min(3,b)):l?'<br>🔒 あと'+l+'もん':'<br>たたかう！'}</small></button>`}).join('')}</div>`}
   <p class="note">1かい ${N}もん。おわると たまごが すこし そだつよ。${PET}かいで おとなに なって、いきものスタンプが 1こ できるよ。まとまりの もんだいを ぜんぶ クリアすると、ボスと たたかえるよ。${lv()===2?'ボスは じかんせいげん つき。3もん つづけて せいかいすると コンボで こうげきが 2ばいに なるよ。':''}</p>`;
   $.innerHTML=h;
   $.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>start(+b.dataset.u));
@@ -583,7 +583,7 @@ function records(){
   <div class="bar"><button class="btn sm" id="ex">記録を書き出す</button><button class="btn sm" id="im">貼りつけた記録を読みこむ</button><button class="btn sm" id="rs">記録をすべて消す</button><button class="btn sm rev" id="rs2" hidden>本当に消す（元に戻せません）</button></div>
   <textarea id="tx" placeholder="ここに記録の文字列が出ます／貼りつけます"></textarea><p class="okline" id="bm"></p>
   <h2>このクイズについて</h2>
-  <p>2年生のかんじは、小学2年生で習う160字を1字につき「よみ」「かき」の2問ずつ（320問）。じゅくごは、同じ2年生の字を使った音読み中心の熟語150語（300問）。3年生のかんじは、3年生で習う200字の先取り（400問）です。どれも意味の近いものでまとまりに分けてあり、教科書の順番とは一致しません。例文の、問われている語以外はひらがなで書いてあります。ホーム画面の各コーナーは、見出しを押すとたためます。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。19×19は11〜19の段（各段 ×2〜×19、162問）で、「💡 ヒント」で分け方の図を、答えたあとに「10と残りに分ける」計算の手順を表示します。□の計算は、□に入る数をもとめる問題（5種類・${every('S').length}問）で、ヒントと、式を逆にたどる解き方の説明がつきます。</p></div>`;
+  <p>「かんじ 1」は160字を、1字につき「よみ」「かき」の2問ずつ（320問）。「じゅくご」は、かんじ 1 と同じ字を使った音読み中心の熟語150語（300問）。「かんじ 2」は、その次の段階の200字（400問）です。どれも意味の近いものでまとまりに分けてあります。例文の、問われている語以外はひらがなで書いてあります。ホーム画面の各コーナーは、見出しを押すとたためます。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。19×19は11〜19の段（各段 ×2〜×19、162問）で、「💡 ヒント」で分け方の図を、答えたあとに「10と残りに分ける」計算の手順を表示します。□の計算は、□に入る数をもとめる問題（5種類・${every('S').length}問）で、ヒントと、式を逆にたどる解き方の説明がつきます。</p></div>`;
   $.innerHTML=h;
   document.getElementById('bk').onclick=home;
   document.getElementById('lv').onclick=()=>{st.set.lv=lv()===2?1:2;save();records()};
