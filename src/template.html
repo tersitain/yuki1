@@ -47,6 +47,7 @@ h2 small{font-size:.85rem;color:var(--sub);font-weight:600}
 .unit{text-align:left;border:2px solid var(--line);background:var(--card);border-radius:18px;padding:12px 14px;display:block;width:100%;position:relative}
 .unit .em{font-size:1.9rem;line-height:1.2;display:block}
 .unit .num{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--kk2);color:var(--kk);font-size:1.5rem;font-weight:800}
+.unit .num.w{font-size:1.2rem}
 .unit b{display:block;font-size:1.02rem;margin-top:2px}
 .unit small{color:var(--sub);display:block;font-size:.82rem;font-weight:600}
 .unit .done{position:absolute;top:8px;right:10px;font-size:1.3rem}
@@ -83,7 +84,7 @@ h2 small{font-size:.85rem;color:var(--sub);font-weight:600}
 .sent rt{font-size:1.05rem;font-weight:700;color:var(--ok);font-family:"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif}
 .sent.num{font-size:3.2rem;line-height:1.6;letter-spacing:.04em}
 .sent.num mark{min-width:1.6em;display:inline-block}
-.yomi{text-align:center;font-size:1.25rem;font-weight:700;color:var(--kk);min-height:1.9em;margin:0}
+.yomi{text-align:center;font-size:1.2rem;font-weight:700;color:var(--kk);min-height:1.9em;margin:0}
 .spk{text-align:center;min-height:50px}
 .spk button{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 18px;font-weight:700;font-size:.95rem;color:var(--sub);min-height:44px}
 .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
@@ -96,6 +97,18 @@ h2 small{font-size:.85rem;color:var(--sub);font-weight:600}
 .opt:disabled{cursor:default;color:inherit}
 .opt:disabled:not(.ok):not(.ng){opacity:.5}
 @media(max-width:520px){h1{font-size:1.2rem}.opts{grid-template-columns:1fr}.opt{min-height:64px}.sent{font-size:1.6rem}.sent.num{font-size:2.6rem}}
+.opts.four{grid-template-columns:repeat(4,1fr)}
+@media(max-width:700px){.opts.four{grid-template-columns:repeat(2,1fr)}}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:400px;margin:10px auto 0}
+.key{border:3px solid var(--line);background:var(--card);border-radius:18px;font-size:1.9rem;font-weight:700;min-height:66px}
+.key.sub{font-size:1.05rem;color:var(--sub)}
+.key.go{font-size:1.1rem;background:var(--kk);border-color:var(--kk);color:#fff}
+@media(prefers-color-scheme:dark){.key.go{color:#1b1a18}}
+.key:disabled{opacity:.45;cursor:default}
+.key:active:not(:disabled){transform:scale(.96)}
+.tm{height:10px;background:var(--line);border-radius:5px;overflow:hidden;max-width:420px;margin:8px auto 0}
+.tm i{display:block;height:100%;width:100%;background:var(--kk)}.tm i.red{background:var(--ng)}
+.combo{color:var(--gold);font-weight:800;min-height:1.7em;font-size:1.05rem}
 .msg{font-weight:800;font-size:1.35rem;margin:14px 0 0;min-height:1.7em;text-align:center}
 .msg.ok{color:var(--ok)}.msg.ng{color:var(--ng)}
 .res{text-align:center}
@@ -146,11 +159,15 @@ const YOMI=[
  'はちいちが はち|はちに じゅうろく|はちさん にじゅうし|はちし さんじゅうに|はちご しじゅう|はちろく しじゅうはち|はちしち ごじゅうろく|はっぱ ろくじゅうし|はっく しちじゅうに',
  'くいちが く|くに じゅうはち|くさん にじゅうしち|くし さんじゅうろく|くご しじゅうご|くろく ごじゅうし|くしち ろくじゅうさん|くは しちじゅうに|くく はちじゅういち'
 ].map(s=>s.split('|'));
-const MON=['👾','🐲','👹','👻','🦖','🐙','🦂','🕷️','🦇','🐍','🦈','🐊','🦑','🧟','👺','🤖','🦍','🐗','🦅','🐯','🦁','🐉','☃️','🎃','🧛','🦏','🐺'];
+const MON=['👾','🐲','👹','👻','🦖','🐙','🦂','🕷️','🦇','🐍','🦈','🐊','🦑','🧟','👺','🤖','🦍','🐗','🦅','🐯','🦁','🐉','☃️','🎃','🧛','🦏','🐺','🦕','🐻','🦉','🦀','🐝','🦎','🐘','🐳','🦄'];
+// 形のにた字（「むずかしい」の かき問題で、まぎらわしい選択肢に使う）
+const LOOK=['話語読記計','線組細紙絵','近遠道通週','間聞門','海池汽活','体何作休','晴明曜時春昼星朝書','雲雪電雨','姉妹女市','茶花草','地場土池','国図回園','思心田','鳴知合台古同兄言高京','家室字','京交高夜方','前切分刀力','弓引強弱弟','鳥馬魚鳴黒点','父交','午牛年','万方','内肉円','米来番','東車','毛手','頭顔首道','光元兄先見','太大犬','少小','首自目白百','古右石','止正上','丸九','今会合食','夏冬麦','秋科','新親','売買読','買貝見','歩走止足','野里理黒','毎海母','用角月','西四','教数','算答','店広','寺時','多夕外名','岩山石'];
+// ボスの制限時間（秒）。たおすたびに短くなる
+const TIME={k:[15,12,10],m:[10,8,6],M:[30,25,20]};
 const PRAISE=['せいかい！','やったね！','すごい！','そのちょうし！','ばっちり！'];
 
 const $=document.getElementById('app');
-const KEY='ninen-quiz-v1',N=5,GOAL=3,BOSS_HP=8,HEARTS=3;
+const KEY='ninen-quiz-v1',N=5,GOAL=3,HEARTS=3;
 let st={v:1,q:{},days:{},boss:{},set:{},ts:0},lsOK=false,idbOK=false,screen='home';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -158,6 +175,7 @@ const rec0=k=>st.q[k]||{r:0,w:0,s:0,m:0};
 function today(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function valid(s){return !!(s&&s.v===1&&s.q&&s.days)}
 function norm(s){s.boss=s.boss||{};s.set=s.set||{};return s}
+const lv=()=>st.set.lv===1?1:2;   // 1=ふつう 2=むずかしい
 
 /* ---- 保存：localStorage と IndexedDB の両方に書き、新しいほうを読む ---- */
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(valid(s))st=norm(s);
@@ -184,36 +202,44 @@ KANJI.forEach((u,ui)=>{const es=u.k.map(x=>({u:ui,k:x[0],pre:x[1],stem:x[2],sr:x
 for(let a=1;a<=9;a++){const ui=UNITS.length,qs=[];
   for(let b=1;b<=9;b++)qs.push({key:'m:'+a+'x'+b,type:'m',u:ui,a,b});
   UNITS.push({id:'m'+a,g:'m',t:a+'のだん',e:String(a),qs})}
-const GROUPS={k:'かんじ',m:'九九'};
+for(let a=11;a<=19;a++){const ui=UNITS.length,qs=[];
+  for(let b=2;b<=19;b++)qs.push({key:'m:'+a+'x'+b,type:'m',u:ui,a,b});
+  UNITS.push({id:'m'+a,g:'M',t:a+'のだん',e:String(a),qs})}
+const GROUPS={k:'かんじ',m:'九九',M:'19×19'};
+function looks(k){const s=new Set();LOOK.forEach(g=>{if(g.includes(k))[...g].forEach(c=>{if(c!==k)s.add(c)})});return [...s]}
+function how(q){const a=q.a,b=q.b;if(a<10)return YOMI[a-1][b-1];
+  return b>10?`${a}×10＝${a*10} と ${a}×${b-10}＝${a*(b-10)} を あわせて ${a*b}`:b===10?`${a} の 10ばいで ${a*b}`:`10×${b}＝${10*b} と ${a-10}×${b}＝${(a-10)*b} を あわせて ${a*b}`}
 const every=g=>UNITS.reduce((a,u)=>(!g||u.g===g)?a.concat(u.qs):a,[]);
 const same=q=>q.e?q.e.k:q.key;   // 同じ字のよみ・かきは1回の中で重ねない
 const ans=q=>q.type==='r'?q.e.sr+q.e.oku:q.type==='w'?q.e.stem:String(q.a*q.b);
 // 送りがなの形：ようす（〜い）、うごき（〜う段）、そのほか（名前のことば）
 const kind=o=>/い$/.test(o)?'a':/[うくすつぬむるぐぶ]$/.test(o)?'v':'n';
 function opts(q){
-  if(q.type==='m'){const c=q.a*q.b,s=new Set();
-    [[q.a,q.b-1],[q.a,q.b+1],[q.a-1,q.b],[q.a+1,q.b]].forEach(([x,y])=>{if(x>=1&&x<=9&&y>=1&&y<=9&&x*y!==c)s.add(x*y)});
-    [c+1,c-1,c+2,c+10].forEach(v=>{if(s.size<2&&v>0&&v!==c)s.add(v)});
-    return [c].concat(shuf([...s]).slice(0,2)).sort((x,y)=>x-y).map(String)}
-  const e=q.e,r=q.type==='r',full=o=>o.sr+o.oku;
+  const n=lv()===2?4:3;
+  if(q.type==='m'){const c=q.a*q.b,s=new Set(),a=q.a,b=q.b;
+    (a>9?[c-10,c+10,c-a,c+a,c-b,c+b]:[a*(b-1),a*(b+1),(a-1)*b,(a+1)*b]).forEach(v=>{if(v>0&&v!==c)s.add(v)});
+    [c+1,c-1,c+2,c+10].forEach(v=>{if(s.size<n-1&&v>0&&v!==c)s.add(v)});
+    return [c].concat(shuf([...s]).slice(0,n-1)).sort((x,y)=>x-y).map(String)}
+  const e=q.e,r=q.type==='r',full=o=>o.sr+o.oku,out=[ans(q)];
+  // むずかしい：形のにた字を2つまでまぜる（同じよみになる字はのぞく）
+  if(!r&&lv()===2&&e.stem.length===1)shuf(looks(e.k)).filter(c=>!ENT.some(o=>o.stem===c&&o.sr===e.sr)).slice(0,2).forEach(c=>out.push(c));
   const cand=ENT.filter(o=>o!==e&&(r?full(o)!==full(e):(o.sr!==e.sr&&o.stem!==e.stem)));
   const score=o=>{let s=Math.random()*2;
     if(o.oku===e.oku)s+=r?8:3;else if(kind(o.oku)===kind(e.oku))s+=r?4:2;
     if(o.u===e.u)s+=1.5;
     if(r){if(Math.abs(full(o).length-full(e).length)<=1)s+=1}else if(o.stem.length===e.stem.length)s+=8;
     return s};
-  const out=[ans(q)];
-  cand.map(o=>[score(o),o]).sort((x,y)=>y[0]-x[0]).some(([,o])=>{const v=r?full(o):o.stem;if(!out.includes(v))out.push(v);return out.length===3});
+  cand.map(o=>[score(o),o]).sort((x,y)=>y[0]-x[0]).some(([,o])=>{const v=r?full(o):o.stem;if(!out.includes(v))out.push(v);return out.length>=n});
   return shuf(out)}
-function label(q){return q.type==='r'?'いろの ついた かんじは、なんと よむかな？':q.type==='w'?'いろの ついた ところを、かんじで かくと どれかな？':'こたえは どれかな？'}
+function label(q){return q.type==='r'?'いろの ついた かんじは、なんと よむかな？':q.type==='w'?'いろの ついた ところを、かんじで かくと どれかな？':lv()===2?'こたえを すうじで いれよう':'こたえは どれかな？'}
 function body(q,done){
-  if(q.type==='m')return `<p class="sent num">${q.a} × ${q.b} ＝ <mark class="${done?'done':''}">${done?q.a*q.b:'？'}</mark></p><p class="yomi">${done?esc(YOMI[q.a-1][q.b-1]):''}</p>`;
+  if(q.type==='m')return `<p class="sent num">${q.a} × ${q.b} ＝ <mark class="${done?'done':''}">${done?q.a*q.b:'？'}</mark></p><p class="yomi">${done?esc(how(q)):''}</p>`;
   const e=q.e;let mid;
   if(done)mid=`<mark class="done"><ruby class="kj">${esc(e.stem)}<rt>${esc(e.sr)}</rt></ruby></mark>${esc(e.oku)}`;
   else if(q.type==='r')mid=`<mark class="kj">${esc(e.stem+e.oku)}</mark>`;
   else mid=`<mark>${esc(e.sr)}</mark>${esc(e.oku)}`;
   return `<p class="sent">${esc(e.pre)}${mid}${esc(e.post)}</p>`}
-function voice(q,done){if(q.type==='m')return done?YOMI[q.a-1][q.b-1]:q.a+' かける '+q.b+' は？';
+function voice(q,done){if(q.type==='m')return !done?q.a+' かける '+q.b+' は？':q.a<10?YOMI[q.a-1][q.b-1]:q.a+' かける '+q.b+' は '+q.a*q.b;
   if(q.type==='r'&&!done)return '';const e=q.e;return e.pre+e.sr+e.oku+e.post}
 function plain(q){if(q.type==='m')return q.a+' × '+q.b+' ＝ '+q.a*q.b;const e=q.e;
   return e.pre+'【'+e.stem+e.oku+'】'+e.post+'　'+(q.type==='r'?'よみ：'+e.sr+e.oku:'かき：'+e.stem)}
@@ -260,11 +286,11 @@ function review(){const p=pending().sort((a,b)=>rec0(b.key).w-rec0(a.key).w||(re
 
 /* ---- ホーム ---- */
 function unitCard(u,k){const s=unitStat(k),full=s.c===s.n;
-  return `<button class="unit ${u.g}" data-u="${k}">${u.g==='m'?`<span class="num">${u.e}</span>`:`<span class="em">${u.e}</span>`}<b>${esc(u.t)}</b><small>${s.c} / ${s.n} もん クリア</small>${s.m?`<span class="badge">ふくしゅう ${s.m}</span>`:full?'<span class="done">⭐</span>':''}<div class="meter"><i style="width:${Math.round(s.c/s.n*100)}%"></i></div></button>`}
+  return `<button class="unit ${u.g==='k'?'k':'m'}" data-u="${k}">${u.g==='k'?`<span class="em">${u.e}</span>`:`<span class="num ${u.e.length>1?'w':''}">${u.e}</span>`}<b>${esc(u.t)}</b><small>${s.c} / ${s.n} もん クリア</small>${s.m?`<span class="badge">ふくしゅう ${s.m}</span>`:full?'<span class="done">⭐</span>':''}<div class="meter"><i style="width:${Math.round(s.c/s.n*100)}%"></i></div></button>`}
 function home(){
-  screen='home';hush();const r=rounds(today()),pe=pending().length,won=UNITS.filter((_,k)=>beaten(k)).length;
+  stopTick();screen='home';hush();const r=rounds(today()),pe=pending().length,won=UNITS.filter((_,k)=>beaten(k)).length;
   const slots=Math.max(GOAL,Math.min(r,10));let sp='';for(let i=0;i<slots;i++)sp+=`<span class="${i<r?'on':''}">${i<r?'💮':''}</span>`;
-  const tk=totals('k'),tm=totals('m');
+  const tk=totals('k'),tm=totals('m'),tM=totals('M');
   let h=`<div class="head"><h1>2年生 かんじ・九九クイズ</h1><button class="link" id="rc">おうちの方へ</button></div>
   <div class="stampbox"><b>きょうの スタンプ</b><div class="stamps">${sp}</div>${r>10?`<b>+${r-10}</b>`:''}
   <div class="cnt"><span>ぜんぶで <i>${allStamps()}</i> こ</span><span>れんぞく <i>${streak()}</i> 日</span></div></div>
@@ -276,11 +302,14 @@ function home(){
   <h2>✖️ 九九 <small>${tm.c} / ${tm.n} もん クリア</small></h2>
   <div class="bar"><button class="btn kk big" data-g="m">▶ 九九を ${N}もん</button><button class="btn" id="mmix">九九 ミックス</button></div>
   <div class="units">${UNITS.map((u,k)=>u.g==='m'?unitCard(u,k):'').join('')}</div>
+  <h2>🔢 19×19 <small>${tM.c} / ${tM.n} もん クリア</small></h2>
+  <div class="bar"><button class="btn kk big" data-g="M">▶ 19×19を ${N}もん</button></div>
+  <div class="units">${UNITS.map((u,k)=>u.g==='M'?unitCard(u,k):'').join('')}</div>
   <h2>👾 ボスバトル <small>たおした かず ${won} / ${UNITS.length}</small></h2>
   <p class="alert" id="lk" hidden></p>
   <div class="bosses">${UNITS.map((u,k)=>{const b=beaten(k),l=lockLeft(k);
     return `<button class="bz ${b?'won':'off'} ${l?'lock':b?'':'ready'}" data-b="${k}"><span>${MON[k%MON.length]}</span><small>${esc(u.t)}${b?'<br>'+'★'.repeat(Math.min(3,b)):l?'<br>🔒 あと'+l+'もん':'<br>たたかう！'}</small></button>`}).join('')}</div>
-  <p class="note">1かい ${N}もん。おわると スタンプが 1こ もらえるよ。まとまりの もんだいを ぜんぶ クリアすると、ボスと たたかえるよ。</p>`;
+  <p class="note">1かい ${N}もん。おわると スタンプが 1こ もらえるよ。まとまりの もんだいを ぜんぶ クリアすると、ボスと たたかえるよ。${lv()===2?'ボスは じかんせいげん つき。3もん つづけて せいかいすると コンボで こうげきが 2ばいに なるよ。':''}</p>`;
   $.innerHTML=h;
   $.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>start(+b.dataset.u));
   $.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>next(b.dataset.g));
@@ -292,30 +321,41 @@ function home(){
   window.scrollTo(0,0)}
 
 /* ---- もんだいを出す（共通） ---- */
-// #qa に選択肢を出し、答えたら done(正解か) を1回だけ呼ぶ
+// #qa に選択肢（むずかしいの計算はテンキー）を出し、答えたら done(正解か, 時間切れか) を1回だけ呼ぶ
 function ask(q,done){
-  const el=document.getElementById('qa'),os=opts(q),a=ans(q);let fin=false;
-  const cls=q.type==='w'?'kj':q.type==='m'?'n':os.some(o=>o.length>5)?'long':'';
+  const el=document.getElementById('qa'),a=ans(q);let fin=false;
+  const end=(ok,out)=>{document.getElementById('qs').innerHTML=body(q,true);spk(q,true);
+    const m=document.getElementById('ms');m.className='msg '+(ok?'ok':'ng');
+    m.textContent=ok?'⭕ '+PRAISE[Math.floor(Math.random()*PRAISE.length)]:(out?'⏰ じかんぎれ！ ':'❌ ')+'こたえは「'+a+'」だよ';done(ok,!!out)};
+  if(q.type==='m'&&lv()===2){let v='';el.className='pad';
+    el.innerHTML=[7,8,9,4,5,6,1,2,3].map(n=>`<button class="key" data-n="${n}">${n}</button>`).join('')+'<button class="key sub" data-n="x">けす</button><button class="key" data-n="0">0</button><button class="key go" data-n="ok">こたえる</button>';
+    const ks=[...el.querySelectorAll('.key')],mk=()=>{const m=document.querySelector('#qs mark');if(m)m.textContent=v||'？'};
+    const finish=out=>{if(fin)return;fin=true;ks.forEach(k=>k.disabled=true);end(!out&&v===a,out)};
+    ks.forEach(k=>k.onclick=()=>{if(fin)return;const n=k.dataset.n;
+      if(n==='ok'){if(v)finish(false);return}
+      if(n==='x')v=v.slice(0,-1);else if(v.length<3)v=(v==='0'?'':v)+n;mk()});
+    return {timeout:()=>finish(true)}}
+  const os=opts(q),cls=q.type==='w'?'kj':q.type==='m'?'n':os.some(o=>o.length>5)?'long':'';
+  el.className='opts'+(os.length===4?' four':'');
   el.innerHTML=os.map((o,i)=>`<button class="opt ${cls}" data-i="${i}">${esc(o)}</button>`).join('');
   const bs=[...el.querySelectorAll('.opt')];
-  bs.forEach((b,i)=>b.onclick=()=>{if(fin)return;fin=true;const ok=os[i]===a;
-    bs.forEach((c,j)=>{c.disabled=true;if(os[j]===a)c.classList.add('ok')});if(!ok)b.classList.add('ng');
-    document.getElementById('qs').innerHTML=body(q,true);spk(q,true);
-    const m=document.getElementById('ms');m.className='msg '+(ok?'ok':'ng');
-    m.textContent=ok?'⭕ '+PRAISE[Math.floor(Math.random()*PRAISE.length)]:'❌ こたえは「'+a+'」だよ';done(ok)})}
+  const finish=i=>{if(fin)return;fin=true;const ok=i>=0&&os[i]===a;
+    bs.forEach((c,j)=>{c.disabled=true;if(os[j]===a)c.classList.add('ok')});if(i>=0&&!ok)bs[i].classList.add('ng');end(ok,i<0)};
+  bs.forEach((b,i)=>b.onclick=()=>finish(i));return {timeout:()=>finish(-1)}}
 function spk(q,done){const el=document.getElementById('sp'),t=voice(q,done);
   el.innerHTML=t&&ttsOn()?'<button id="sb">🔊 きく</button>':'';if(t&&ttsOn())document.getElementById('sb').onclick=()=>speak(t)}
 function qcard(q,extra){return `<div class="card">${extra||''}<p class="ask">${label(q)}</p><div id="qs">${body(q,false)}</div><div class="spk" id="sp"></div><div class="opts" id="qa"></div><p class="msg" id="ms"></p><div class="bar ctr"><button class="btn pri big" id="nx" hidden>つぎへ ▶</button></div></div>`}
 
 function run(qs,title,u,g,isRev){
   if(!qs.length)return home();
-  screen='run';qs=qs.slice();const base=qs.length,log=[];let k=0,score=0;
+  stopTick();screen='run';qs=qs.slice();const base=qs.length,log=[];let k=0,score=0,row=0;
   function show(){const q=qs[k];
     let dots='';for(let i=0;i<base;i++)dots+=`<i class="${log[i]==null?(i===k?'now':''):log[i]?'ok':'ng'}"></i>`;
     $.innerHTML=`<div class="top"><button class="back" id="bk">← やめる</button><span class="ttl">${esc(title)}</span><div class="dots">${dots}</div></div>`
       +qcard(q,q.re?'<p style="text-align:center;margin:0 0 6px"><span class="tag">もういちど ちょうせん</span></p>':'');
     document.getElementById('bk').onclick=home;spk(q,false);
     ask(q,ok=>{mark(q,ok);if(!q.re){log[k]=ok;if(ok)score++;else qs.push(Object.assign({},q,{re:1}))}
+      row=ok?row+1:0;if(row>=3)document.getElementById('ms').textContent+='　🔥 '+row+'もん れんぞく！';
       const nx=document.getElementById('nx');nx.hidden=false;nx.onclick=()=>{hush();k++;k<qs.length?show():result()}});
     window.scrollTo(0,0)}
   function result(){
@@ -339,24 +379,31 @@ function run(qs,title,u,g,isRev){
   show()}
 
 /* ---- ボスバトル ---- */
+let tick=null;function stopTick(){if(tick){clearInterval(tick);tick=null}}
 function boss(u){
-  screen='boss';const U=UNITS[u],mon=MON[u%MON.length];let hp=BOSS_HP,life=HEARTS,pool=[];
+  stopTick();screen='boss';const U=UNITS[u],mon=MON[u%MON.length],hard=lv()===2,HP=hard?10:8,sec=hard?TIME[U.g][Math.min(2,beaten(u))]:0;
+  let hp=HP,life=HEARTS,pool=[],combo=0;
   function draw(){if(!pool.length)pool=shuf(U.qs);return pool.pop()}
-  function arena(cls){return `<div class="arena"><div class="bname">${esc(U.t)}の ボス</div><div class="face ${cls||''}" id="fc">${mon}</div>
-    <div class="hp"><i style="width:${hp/BOSS_HP*100}%"></i></div><div class="hearts">${'❤️'.repeat(life)}${'🤍'.repeat(HEARTS-life)}</div></div>`}
+  function arena(cls,live){return `<div class="arena"><div class="bname">${esc(U.t)}の ボス${beaten(u)?'　Lv.'+(Math.min(2,beaten(u))+1):''}</div><div class="face ${cls||''}" id="fc">${mon}</div>
+    <div class="hp"><i style="width:${hp/HP*100}%"></i></div><div class="hearts">${'❤️'.repeat(life)}${'🤍'.repeat(HEARTS-life)}</div>
+    <div class="combo">${combo>=3?'🔥 '+combo+'コンボ！ こうげき 2ばい':combo===2?'あと 1もんで コンボ！':''}</div>${sec&&live?`<div class="tm"><i id="tb"></i></div>`:''}</div>`}
   function show(){const q=draw();
-    $.innerHTML=`<div class="top"><button class="back" id="bk">← にげる</button><span class="ttl">ボスバトル</span><span></span></div><div id="ar">${arena()}</div>`+qcard(q);
+    $.innerHTML=`<div class="top"><button class="back" id="bk">← にげる</button><span class="ttl">ボスバトル</span><span></span></div><div id="ar">${arena('',true)}</div>`+qcard(q);
     document.getElementById('bk').onclick=home;spk(q,false);
-    ask(q,ok=>{mark(q,ok);if(ok)hp--;else life--;
+    const h=ask(q,ok=>{stopTick();mark(q,ok);if(ok){combo++;hp=Math.max(0,hp-(combo>=3?2:1))}else{combo=0;life--}
       document.getElementById('ar').innerHTML=arena(ok?(hp?'hit':'down'):'');
       const nx=document.getElementById('nx');nx.hidden=false;
-      nx.textContent=!hp?'やった！ ▶':!life?'つぎへ ▶':ok?'こうげき！ ▶':'つぎへ ▶';
+      nx.textContent=!hp?'やった！ ▶':ok?'こうげき！ ▶':'つぎへ ▶';
       nx.onclick=()=>{hush();(!hp||!life)?end(!hp):show()}});
+    if(sec){const t0=Date.now();tick=setInterval(()=>{const b=document.getElementById('tb');if(!b)return stopTick();
+      const left=1-(Date.now()-t0)/(sec*1000);b.style.width=Math.max(0,left*100)+'%';b.className=left<.3?'red':'';
+      if(left<=0){stopTick();h.timeout()}},100)}
     window.scrollTo(0,0)}
   function end(win){
-    if(win){st.boss[U.id]=beaten(u)+1;save()}
+    stopTick();if(win){st.boss[U.id]=beaten(u)+1;save()}
     $.innerHTML=`<div class="card res"><div class="stamp">${win?mon:'💦'}</div><h1>${win?'ボスを たおした！':'ざんねん…'}</h1>
     <p class="sc">${win?'「'+esc(U.t)+'」の ボスが ずかんに はいったよ。'+'★'.repeat(Math.min(3,beaten(u))):'もういちど れんしゅうして、また ちょうせんしよう。'}</p>
+    ${win&&hard&&beaten(u)<3?'<p class="sc">つぎは ボスが レベルアップ！ じかんが みじかく なるよ。</p>':''}
     <div class="bar ctr"><button class="btn ${win?'':'pri'} big" id="ag">${win?'もういちど たたかう':'もういちど'}</button>${win?'':`<button class="btn big" id="pr">れんしゅうする</button>`}<button class="btn ${win?'pri':''} big" id="hm">おわる</button></div></div>`;
     document.getElementById('hm').onclick=home;document.getElementById('ag').onclick=()=>boss(u);
     if(!win)document.getElementById('pr').onclick=()=>start(u);window.scrollTo(0,0)}
@@ -364,7 +411,7 @@ function boss(u){
 
 /* ---- おうちの方へ（きろく） ---- */
 function records(){
-  screen='rec';hush();const t=totals(),g=st.days[today()]||[0,0,0];
+  stopTick();screen='rec';hush();const t=totals(),g=st.days[today()]||[0,0,0];
   const days=[];for(let i=0;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const k=today(d),v=st.days[k];if(v)days.push([k,v])}
   const wrong=every().filter(q=>rec0(q.key).w>0).sort((a,b)=>rec0(b.key).w-rec0(a.key).w);
   let h=`<div class="top"><button class="back" id="bk">← もどる</button><span></span></div><div class="pa"><h1>おうちの方へ</h1>
@@ -374,20 +421,23 @@ function records(){
   <h2>日ごとの記録（直近14日）</h2>${days.length?`<table><tr><th>日付</th><th class="r">回数（スタンプ）</th><th class="r">といた数</th><th class="r">正解</th><th class="r">正答率</th></tr>
   ${days.map(([k,v])=>`<tr><td>${k}</td><td class="r">${v[2]||0}</td><td class="r">${v[0]}</td><td class="r">${v[1]}</td><td class="r">${v[0]?Math.round(v[1]/v[0]*100)+'%':'–'}</td></tr>`).join('')}</table>`:'<p>まだ記録がありません。</p>'}
   <h2>まとまりごとの進み具合</h2><table><tr><th>まとまり</th><th class="r">クリア</th><th class="r">正答率</th><th class="r">復習待ち</th><th class="r">ボス</th></tr>
-  ${UNITS.map((u,k)=>{const s=unitStat(k);return `<tr><td>${u.g==='k'?'かんじ：':'九九：'}${esc(u.t)}</td><td class="r">${s.c} / ${s.n}</td><td class="r">${s.rate==null?'–':s.rate+'%'}</td><td class="r ${s.m?'ngc':''}">${s.m||'–'}</td><td class="r">${beaten(k)?'★'.repeat(Math.min(3,beaten(k))):'–'}</td></tr>`}).join('')}</table>
+  ${UNITS.map((u,k)=>{const s=unitStat(k);return `<tr><td>${GROUPS[u.g]}：${esc(u.t)}</td><td class="r">${s.c} / ${s.n}</td><td class="r">${s.rate==null?'–':s.rate+'%'}</td><td class="r ${s.m?'ngc':''}">${s.m||'–'}</td><td class="r">${beaten(k)?'★'.repeat(Math.min(3,beaten(k))):'–'}</td></tr>`}).join('')}</table>
   <p class="note" style="margin-top:6px">クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
   <h2>まちがえたことのある問題（${wrong.length}問）</h2>${wrong.length?`<table><tr><th>問題</th><th class="r">まちがい</th><th class="r">正解</th><th class="r">いま</th></tr>
   ${wrong.map(q=>{const x=rec0(q.key);return `<tr><td>${esc(plain(q))}</td><td class="r ngc">${x.w}</td><td class="r">${x.r}</td><td class="r">${x.m?'復習待ち':'○'}</td></tr>`}).join('')}</table>`:'<p>まだありません。</p>'}
   <h2>設定</h2>
+  <div class="bar"><button class="btn sm" id="lv">むずかしさ：${lv()===2?'むずかしい':'ふつう'}</button></div>
+  <p class="note" style="margin:0 0 8px">むずかしい＝かんじは4択で、かき問題に形のにた字がまざります。計算は答えの数字を入力します。ボスは時間制限つきで、たおすたびに短くなります。ふつう＝すべて3択、時間制限なし。</p>
   <div class="bar">${canSpeak?`<button class="btn sm" id="tt">読み上げボタン：${ttsOn()?'表示する':'表示しない'}</button>`:'<span class="note" style="margin:0">この端末では読み上げが使えません。</span>'}</div>
   <h2>記録のバックアップ</h2>
   <p>下の文字列をコピーして保存しておくと、あとで「読みこむ」で記録を戻せます。</p>
   <div class="bar"><button class="btn sm" id="ex">記録を書き出す</button><button class="btn sm" id="im">貼りつけた記録を読みこむ</button><button class="btn sm" id="rs">記録をすべて消す</button><button class="btn sm rev" id="rs2" hidden>本当に消す（元に戻せません）</button></div>
   <textarea id="tx" placeholder="ここに記録の文字列が出ます／貼りつけます"></textarea><p class="okline" id="bm"></p>
   <h2>このクイズについて</h2>
-  <p>かんじは、小学2年生で習う160字を1字につき「よみ」「かき」の2問ずつ（320問）。意味の近い字で18のまとまりに分けてあり、教科書の順番とは一致しません。例文に使う漢字は2年生までに習う字だけです。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。</p></div>`;
+  <p>かんじは、小学2年生で習う160字を1字につき「よみ」「かき」の2問ずつ（320問）。意味の近い字で18のまとまりに分けてあり、教科書の順番とは一致しません。例文に使う漢字は2年生までに習う字だけです。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。19×19は11〜19の段（各段 ×2〜×19、162問）で、答えたあとに「10のまとまりと残りに分ける」考え方を表示します。</p></div>`;
   $.innerHTML=h;
   document.getElementById('bk').onclick=home;
+  document.getElementById('lv').onclick=()=>{st.set.lv=lv()===2?1:2;save();records()};
   if(canSpeak)document.getElementById('tt').onclick=()=>{st.set.tts=!ttsOn();save();records()};
   const tx=document.getElementById('tx'),bm=document.getElementById('bm');
   document.getElementById('ex').onclick=()=>{tx.value=JSON.stringify(st);tx.select();bm.textContent='書き出しました。全体をコピーして、メモなどに保存してください。'};
