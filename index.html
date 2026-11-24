@@ -26,11 +26,15 @@ h2{font-size:1.2rem;margin:26px 0 10px;display:flex;align-items:center;gap:10px;
 h2 small{font-size:.85rem;color:var(--sub);font-weight:600}
 .head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .link{white-space:nowrap;flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-size:.85rem;font-weight:700;color:var(--sub)}
-.stampbox{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px 16px;margin:14px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.stampbox b{font-size:1rem}
-.stamps{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.stamps span{width:46px;height:46px;border-radius:50%;border:2.5px dashed var(--line);display:grid;place-items:center;font-size:1.7rem;line-height:1}
-.stamps span.on{border:0;background:var(--acc2)}
+.stampbox{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:12px 16px;margin:14px 0;display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap}
+.cur{display:flex;align-items:center;gap:10px}
+.cur b{display:block;font-size:1.02rem}
+.cur small{display:block;color:var(--sub);font-weight:600;font-size:.82rem}
+.got{display:flex;gap:3px;flex-wrap:wrap;align-items:center}
+.got b{margin-left:6px;font-size:.95rem;color:var(--sub)}
+svg.fl{display:block}
+.np{animation:petal .8s cubic-bezier(.2,1.7,.4,1) .15s both}
+@keyframes petal{0%{transform:scale(0)}100%{transform:scale(1)}}
 .cnt{margin-left:auto;display:flex;gap:14px;font-weight:700;font-size:.95rem;color:var(--sub)}
 .cnt i{font-style:normal;color:var(--ink);font-size:1.15rem}
 .bar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
@@ -112,7 +116,8 @@ h2 small{font-size:.85rem;color:var(--sub);font-weight:600}
 .msg{font-weight:800;font-size:1.35rem;margin:14px 0 0;min-height:1.7em;text-align:center}
 .msg.ok{color:var(--ok)}.msg.ng{color:var(--ng)}
 .res{text-align:center}
-.res .stamp{font-size:5.5rem;line-height:1.2;display:inline-block;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+.res .stamp{font-size:5.5rem;line-height:1.2;display:inline-block;animation:pop .7s cubic-bezier(.2,1.6,.4,1)}
+.res .stamp.still{animation:none}
 @keyframes pop{0%{transform:scale(0) rotate(-40deg)}100%{transform:none}}
 .res h1{font-size:1.7rem;margin:4px 0}
 .res .sc{font-size:1.25rem;font-weight:700;margin:6px 0}
@@ -167,7 +172,7 @@ const TIME={k:[15,12,10],m:[10,8,6],M:[30,25,20]};
 const PRAISE=['せいかい！','やったね！','すごい！','そのちょうし！','ばっちり！'];
 
 const $=document.getElementById('app');
-const KEY='ninen-quiz-v1',N=5,GOAL=3,HEARTS=3;
+const KEY='ninen-quiz-v1',N=5,PET=5,HEARTS=3;
 let st={v:1,q:{},days:{},boss:{},set:{},ts:0},lsOK=false,idbOK=false,screen='home';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -269,6 +274,15 @@ const beaten=u=>st.boss[UNITS[u].id]||0;
 const lockLeft=u=>{const s=unitStat(u);return s.n-s.c};
 function whereSaved(){return lsOK||idbOK?'きろくは この iPad（たんまつ）に ほぞんされます':'この たんまつでは きろくを ほぞんできません。とじると きろくが きえます'}
 
+/* ---- はなスタンプ：1回おわると花びら1まい、5まいで花1こ ---- */
+const FCOL=[['#ffb3c7','#f0527f'],['#ffcf8a','#f08a1c'],['#cdb8ff','#8a63e6'],['#a5dcff','#2c93e0'],['#a9e8b9','#2fae5f'],['#ffe07a','#e0a100']];
+const PETAL='M0,-7 C-15,-15 -17,-36 -6,-45 L0,-39 L6,-45 C17,-36 15,-15 0,-7Z';
+function flower(n,size,ci,full,fresh){const c=FCOL[ci%FCOL.length],g='fg'+ci%FCOL.length;let p='';
+  for(let i=0;i<PET;i++)p+=`<g transform="rotate(${i*72})"><path d="${PETAL}" ${i<n?`fill="url(#${g})" stroke="${c[1]}" stroke-width="1.6" stroke-linejoin="round"${fresh&&i===n-1?' class="np"':''}`:'fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="4 3.5"'}/>${i<n?`<path d="M0,-12 L0,-24" stroke="${c[1]}" stroke-width="1.2" stroke-linecap="round" opacity=".55"/><circle cx="0" cy="-27" r="1.5" fill="${c[1]}" opacity=".55"/>`:''}</g>`;
+  return `<svg class="fl" viewBox="-52 -52 104 104" width="${size}" height="${size}" aria-hidden="true"><defs><radialGradient id="${g}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="46"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></radialGradient></defs>`
+    +(full?`<circle r="50" fill="#fffaf0" stroke="#e9a91b" stroke-width="2.6"/><circle r="45.6" fill="none" stroke="#e9a91b" stroke-width="1.1" stroke-dasharray="1.2 3.2" stroke-linecap="round"/><g transform="scale(.86)">${p}</g>`:p)
+    +`<circle r="${full?6.5:7.5}" fill="${n?'#ffd43b':'none'}" stroke="${n?'#e9a91b':'var(--line)'}" stroke-width="1.6"/></svg>`}
+
 /* ---- 出題のえらび方 ---- */
 function uniq(order,n){const out=[],used=new Set();
   for(const q of order){if(used.has(same(q)))continue;used.add(same(q));out.push(q);if(out.length===n)return out}
@@ -289,11 +303,13 @@ function unitCard(u,k){const s=unitStat(k),full=s.c===s.n;
   return `<button class="unit ${u.g==='k'?'k':'m'}" data-u="${k}">${u.g==='k'?`<span class="em">${u.e}</span>`:`<span class="num ${u.e.length>1?'w':''}">${u.e}</span>`}<b>${esc(u.t)}</b><small>${s.c} / ${s.n} もん クリア</small>${s.m?`<span class="badge">ふくしゅう ${s.m}</span>`:full?'<span class="done">⭐</span>':''}<div class="meter"><i style="width:${Math.round(s.c/s.n*100)}%"></i></div></button>`}
 function home(){
   stopTick();screen='home';hush();const r=rounds(today()),pe=pending().length,won=UNITS.filter((_,k)=>beaten(k)).length;
-  const slots=Math.max(GOAL,Math.min(r,10));let sp='';for(let i=0;i<slots;i++)sp+=`<span class="${i<r?'on':''}">${i<r?'💮':''}</span>`;
+  const tot=allStamps(),fl=Math.floor(tot/PET),pet=tot%PET;let got='';
+  for(let i=Math.max(0,fl-12);i<fl;i++)got+=flower(PET,42,i,true);
   const tk=totals('k'),tm=totals('m'),tM=totals('M');
   let h=`<div class="head"><h1>2年生 かんじ・九九クイズ</h1><button class="link" id="rc">おうちの方へ</button></div>
-  <div class="stampbox"><b>きょうの スタンプ</b><div class="stamps">${sp}</div>${r>10?`<b>+${r-10}</b>`:''}
-  <div class="cnt"><span>ぜんぶで <i>${allStamps()}</i> こ</span><span>れんぞく <i>${streak()}</i> 日</span></div></div>
+  <div class="stampbox"><div class="cur">${flower(pet,76,fl)}<div><b>はなスタンプ <span style="font-size:1.25rem">${fl}</span> こ</b><small>はなびら あと ${PET-pet}まいで 1こ できるよ</small></div></div>
+  <div class="got">${got}${fl>12?`<b>ぜんぶで ${fl}こ</b>`:''}</div>
+  <div class="cnt"><span>きょう <i>${r}</i> かい</span><span>れんぞく <i>${streak()}</i> 日</span></div></div>
   ${lsOK||idbOK?'':`<p class="alert">${whereSaved()}。</p>`}
   ${pe?`<div class="bar"><button class="btn rev" id="rev">🔁 まちがえた もんだいを ふくしゅう（${pe}もん）</button></div>`:''}
   <h2>✏️ かんじ <small>${tk.c} / ${tk.n} もん クリア</small></h2>
@@ -309,7 +325,7 @@ function home(){
   <p class="alert" id="lk" hidden></p>
   <div class="bosses">${UNITS.map((u,k)=>{const b=beaten(k),l=lockLeft(k);
     return `<button class="bz ${b?'won':'off'} ${l?'lock':b?'':'ready'}" data-b="${k}"><span>${MON[k%MON.length]}</span><small>${esc(u.t)}${b?'<br>'+'★'.repeat(Math.min(3,b)):l?'<br>🔒 あと'+l+'もん':'<br>たたかう！'}</small></button>`}).join('')}</div>
-  <p class="note">1かい ${N}もん。おわると スタンプが 1こ もらえるよ。まとまりの もんだいを ぜんぶ クリアすると、ボスと たたかえるよ。${lv()===2?'ボスは じかんせいげん つき。3もん つづけて せいかいすると コンボで こうげきが 2ばいに なるよ。':''}</p>`;
+  <p class="note">1かい ${N}もん。おわると はなびらが 1まい もらえるよ。${PET}まい あつめると、きれいな はなスタンプが 1こ できるよ。まとまりの もんだいを ぜんぶ クリアすると、ボスと たたかえるよ。${lv()===2?'ボスは じかんせいげん つき。3もん つづけて せいかいすると コンボで こうげきが 2ばいに なるよ。':''}</p>`;
   $.innerHTML=h;
   $.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>start(+b.dataset.u));
   $.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>next(b.dataset.g));
@@ -359,12 +375,12 @@ function run(qs,title,u,g,isRev){
       const nx=document.getElementById('nx');nx.hidden=false;nx.onclick=()=>{hush();k++;k<qs.length?show():result()}});
     window.scrollTo(0,0)}
   function result(){
-    screen='res';stamp();const r=rounds(today());
+    screen='res';stamp();const r=rounds(today()),tot=allStamps(),pet=tot%PET,full=pet===0;
     let stars='';for(let i=0;i<base;i++)stars+=i<score?'★':'<i>★</i>';
     const bossReady=u!=null&&!lockLeft(u)&&!beaten(u);
-    $.innerHTML=`<div class="card res"><div class="stamp">💮</div><h1>スタンプ ゲット！</h1>
+    $.innerHTML=`<div class="card res"><div class="stamp ${full?'':'still'}">${full?flower(PET,190,tot/PET-1,true):flower(pet,160,Math.floor(tot/PET),false,true)}</div><h1>${full?'はなスタンプ かんせい！🎉':'はなびら ゲット！'}</h1>
     <p class="sc">${base}もん中 ${score}もん せいかい${score===base?'　ぜんぶ せいかい！':''}</p><div class="star">${stars}</div>
-    <p class="sc">きょうの スタンプ ${r}こ${r===GOAL?'　もくひょう たっせい！🎉':''}</p>
+    <p class="sc">${full?'はなスタンプが '+tot/PET+'こに なったよ！':'あと '+(PET-pet)+'まいで はなスタンプが 1こ できるよ'}</p>
     ${bossReady?`<p class="alert">「${esc(UNITS[u].t)}」を ぜんぶ クリア！ ボスが あらわれた！</p>`:''}
     <div class="bar ctr">${bossReady?`<button class="btn rev big" id="bs">${MON[u%MON.length]} ボスと たたかう</button>`:''}
     <button class="btn pri big" id="ag">もう ${N}もん</button><button class="btn big" id="hm">おわる</button></div></div>`;
@@ -418,11 +434,11 @@ function records(){
   <div class="stats"><div><b>${g[0]}</b><small>今日といた数</small></div><div><b>${g[0]?Math.round(g[1]/g[0]*100)+'%':'–'}</b><small>今日の正答率</small></div>
   <div><b>${t.c} / ${t.n}</b><small>クリアした問題</small></div><div><b>${t.m}</b><small>復習待ちの問題</small></div></div>
   <p class="${lsOK||idbOK?'okline':'alert'}">${lsOK||idbOK?'記録はこの端末の中だけに保存されます（ログイン不要・外部送信なし）。':'この端末では記録を保存できません。'}</p>
-  <h2>日ごとの記録（直近14日）</h2>${days.length?`<table><tr><th>日付</th><th class="r">回数（スタンプ）</th><th class="r">といた数</th><th class="r">正解</th><th class="r">正答率</th></tr>
+  <h2>日ごとの記録（直近14日）</h2>${days.length?`<table><tr><th>日付</th><th class="r">回数（花びら）</th><th class="r">といた数</th><th class="r">正解</th><th class="r">正答率</th></tr>
   ${days.map(([k,v])=>`<tr><td>${k}</td><td class="r">${v[2]||0}</td><td class="r">${v[0]}</td><td class="r">${v[1]}</td><td class="r">${v[0]?Math.round(v[1]/v[0]*100)+'%':'–'}</td></tr>`).join('')}</table>`:'<p>まだ記録がありません。</p>'}
   <h2>まとまりごとの進み具合</h2><table><tr><th>まとまり</th><th class="r">クリア</th><th class="r">正答率</th><th class="r">復習待ち</th><th class="r">ボス</th></tr>
   ${UNITS.map((u,k)=>{const s=unitStat(k);return `<tr><td>${GROUPS[u.g]}：${esc(u.t)}</td><td class="r">${s.c} / ${s.n}</td><td class="r">${s.rate==null?'–':s.rate+'%'}</td><td class="r ${s.m?'ngc':''}">${s.m||'–'}</td><td class="r">${beaten(k)?'★'.repeat(Math.min(3,beaten(k))):'–'}</td></tr>`}).join('')}</table>
-  <p class="note" style="margin-top:6px">クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
+  <p class="note" style="margin-top:6px">1回（5問）おわるごとに花びらが1まい、5まいで「はなスタンプ」1こになります（いま ${Math.floor(allStamps()/PET)}こ）。クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
   <h2>まちがえたことのある問題（${wrong.length}問）</h2>${wrong.length?`<table><tr><th>問題</th><th class="r">まちがい</th><th class="r">正解</th><th class="r">いま</th></tr>
   ${wrong.map(q=>{const x=rec0(q.key);return `<tr><td>${esc(plain(q))}</td><td class="r ngc">${x.w}</td><td class="r">${x.r}</td><td class="r">${x.m?'復習待ち':'○'}</td></tr>`}).join('')}</table>`:'<p>まだありません。</p>'}
   <h2>設定</h2>
