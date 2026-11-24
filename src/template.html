@@ -175,7 +175,7 @@ const TIME={k:[15,12,10],m:[10,8,6],M:[30,25,20]};
 const PRAISE=['せいかい！','やったね！','すごい！','そのちょうし！','ばっちり！'];
 
 const $=document.getElementById('app');
-const KEY='ninen-quiz-v1',N=5,PET=5,HEARTS=3;
+const KEY='ninen-quiz-v1',N=7,PET=7,HEARTS=3;
 let st={v:1,q:{},days:{},boss:{},set:{},ts:0},lsOK=false,idbOK=false,screen='home';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -277,10 +277,11 @@ const beaten=u=>st.boss[UNITS[u].id]||0;
 const lockLeft=u=>{const s=unitStat(u);return s.n-s.c};
 function whereSaved(){return lsOK||idbOK?'きろくは この iPad（たんまつ）に ほぞんされます':'この たんまつでは きろくを ほぞんできません。とじると きろくが きえます'}
 
-/* ---- いきものスタンプ：1回おわるごとに そだち、5回で おとなになる（絵はオリジナルのドット絵） ---- */
-const PX={k:'#3b2f28',w:'#ffffff',p:'#ff9db5',o:'#ff9a2e',a:'#fffaf0'};
+/* ---- いきものスタンプ：1回おわるごとに そだち、PET回で おとなになる（絵はオリジナルのドット絵） ---- */
+const PX={k:'#3b2f28',w:'#ffffff',p:'#ff9db5',o:'#ff9a2e',a:'#fffaf0',g:'#a89c92'};
 const EGG=['................','......kkkk......','.....kaaaak.....','....kaaaaaak....','...kaabbaaaak...','...kaabbaaaak...','..kaaaaaaabbak..','..kaaaaaaabbak..','..kaabbaaaaaak..','..kaabbaaaaaak..','..kaaaaaaaaaak..','...kaaaaabbak...','...kaaaaabbak...','....kaaaaaak....','.....kkkkkk.....','................'];
 const CRACK=[[7,3],[6,4],[7,5],[8,6],[7,7],[6,8],[7,9],[8,10],[7,11],[6,12]];
+const CRACK2=[[5,5],[4,6],[9,7],[10,8],[5,9],[4,10],[9,11]];
 const SHELL={8:'..k..kk..kk..k..',9:'..kkkaakkaakkk..',10:'..kaaaaaaaaaak..',11:'..kaabbaaaaaak..',12:'...kabbaaabbk...',13:'....kaaaaaak....',14:'.....kkkkkk.....'};
 const BABY=['................','................','................','................','.....kkkkkk.....','....kcccccck....','...kcccccccck...','...kcckcckcck...','...kcckcckcck...','...kcpccccpck...','...kcccccccck...','....kcccccck....','.....kkkkkk.....','................','................','................'];
 const KID=['................','.......kk.......','......kcck......','....kkkcckkk....','...kcccccccck...','..kcccccccccck..','..kcckcccckcck..','..kcckcccckcck..','..kcpcckkccpck..','..kcccccccccck..','..kcccccccccck..','...kcccccccck...','....kkkkkkkk....','....kck..kck....','....kkk..kkk....','................'];
@@ -291,13 +292,16 @@ const PETS=[
  {n:'くま',c:['#c98f5a','#9b6638'],v:['#f3f0ea','#cfc8bb'],d:['................','..kkk......kkk..','.kcbck....kcbck.','.kcckkkkkkkkcck.','..kcccccccccck..','..kcccccccccck..','..kcckcccckcck..','..kcckcccckcck..','..kcccwwwwccck..','..kcpwwkkwwpck..','..kcccwwwwccck..','...kcccccccck...','....kkkkkkkk....','....kck..kck....','....kkk..kkk....','................']},
  {n:'ねこ',c:['#ffb866','#e98a2b'],v:['#c3c7d1','#8e94a3'],d:['................','..kk........kk..','..kckk....kkck..','..kcpckkkkcpck..','..kcccccccccck..','..kcccccccccck..','..kcckcccckcck..','..kcckcccckcck..','..kcpccppccpck..','..kccckcckccck..','..kcccckkcccck..','...kcccccccck...','....kkkkkkkk....','....kck..kck....','....kkk..kkk....','................']},
  {n:'ペンギン',c:['#5b8def','#3567c9'],v:['#59607a','#3b4157'],d:['................','.....kkkkkk.....','....kcccccck....','...kcccccccck...','...kcwwccwwck...','..kcwwkwwkwwck..','..kcwwwoowwwck..','.kkcwwwoowwwckk.','.kccwwwwwwwwcck.','.kccwwwwwwwwcck.','.kkcwwwwwwwwckk.','..kcwwwwwwwwck..','...kcwwwwwwck...','....kkkkkkkk....','....ooo..ooo....','................']}];
-const STAGE=['たまご','たまごに ひび','かおが でた','あかちゃん','こども','おとな'];
-const GROW=['','たまごに ひびが はいった！','かおが でてきた！','うまれた！','大きく なった！'];
+const STAGE=['たまご','たまごに ひび','ひびが 大きく','かおが でた','あかちゃん','こども','もうすぐ おとな','おとな'];
+const GROW=['','たまごに ひびが はいった！','ひびが 大きく なった！','かおが でてきた！','うまれた！','大きく なった！','もうすぐ おとな。だれに なるかな？'];
 const petOf=ci=>PETS[ci%PETS.length];
+// 0 たまご → 1・2 ひび → 3 かお → 4 あかちゃん → 5 こども → 6 かげ（おとなの形だけ） → 7 おとな
 function grid(stage,ci){
-  if(stage>=PET)return petOf(ci).d;if(stage===4)return KID;if(stage===3)return BABY;
-  if(stage===2){const g=BABY.slice(3).concat(['................','................','................']);return g.map((r,y)=>SHELL[y]?[...SHELL[y]].map((c,x)=>c==='.'?r[x]:c).join(''):r)}
-  const g=EGG.map(r=>[...r]);if(stage===1)CRACK.forEach(([y,x])=>g[y][x]='k');return g.map(r=>r.join(''))}
+  if(stage>=PET)return petOf(ci).d;
+  if(stage===6)return petOf(ci).d.map(r=>r.replace(/[^.k]/g,'g'));
+  if(stage===5)return KID;if(stage===4)return BABY;
+  if(stage===3){const g=BABY.slice(3).concat(['................','................','................']);return g.map((r,y)=>SHELL[y]?[...SHELL[y]].map((c,x)=>c==='.'?r[x]:c).join(''):r)}
+  const g=EGG.map(r=>[...r]);if(stage>=1)CRACK.forEach(([y,x])=>g[y][x]='k');if(stage===2)CRACK2.forEach(([y,x])=>g[y][x]='k');return g.map(r=>r.join(''))}
 function pet(stage,size,ci){const P=petOf(ci),col=Math.floor(ci/PETS.length)%2?P.v:P.c;let h='';
   grid(stage,ci).forEach((r,y)=>{for(let x=0;x<16;){const c=r[x];let n=1;while(x+n<16&&r[x+n]===c)n++;
     if(c!=='.')h+=`<rect x="${x}" y="${y}" width="${n}" height="1" fill="${c==='c'?col[0]:c==='b'?col[1]:PX[c]}"/>`;x+=n}});
@@ -459,7 +463,7 @@ function records(){
   ${days.map(([k,v])=>`<tr><td>${k}</td><td class="r">${v[2]||0}</td><td class="r">${v[0]}</td><td class="r">${v[1]}</td><td class="r">${v[0]?Math.round(v[1]/v[0]*100)+'%':'–'}</td></tr>`).join('')}</table>`:'<p>まだ記録がありません。</p>'}
   <h2>まとまりごとの進み具合</h2><table><tr><th>まとまり</th><th class="r">クリア</th><th class="r">正答率</th><th class="r">復習待ち</th><th class="r">ボス</th></tr>
   ${UNITS.map((u,k)=>{const s=unitStat(k);return `<tr><td>${GROUPS[u.g]}：${esc(u.t)}</td><td class="r">${s.c} / ${s.n}</td><td class="r">${s.rate==null?'–':s.rate+'%'}</td><td class="r ${s.m?'ngc':''}">${s.m||'–'}</td><td class="r">${beaten(k)?'★'.repeat(Math.min(3,beaten(k))):'–'}</td></tr>`}).join('')}</table>
-  <p class="note" style="margin-top:6px">1回（5問）おわるごとに、たまごのいきものが1段階そだち、5回でおとなになって「いきものスタンプ」1こになります（いま ${Math.floor(allStamps()/PET)}こ）。いきものは6種類×2色です。クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
+  <p class="note" style="margin-top:6px">1回（${N}問）おわるごとに、たまごのいきものが1段階そだち、${PET}回でおとなになって「いきものスタンプ」1こになります（いま ${Math.floor(allStamps()/PET)}こ）。いきものは6種類×2色です。クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
   <h2>まちがえたことのある問題（${wrong.length}問）</h2>${wrong.length?`<table><tr><th>問題</th><th class="r">まちがい</th><th class="r">正解</th><th class="r">いま</th></tr>
   ${wrong.map(q=>{const x=rec0(q.key);return `<tr><td>${esc(plain(q))}</td><td class="r ngc">${x.w}</td><td class="r">${x.r}</td><td class="r">${x.m?'復習待ち':'○'}</td></tr>`}).join('')}</table>`:'<p>まだありません。</p>'}
   <h2>設定</h2>
