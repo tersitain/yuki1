@@ -234,20 +234,28 @@ for(let a=11;a<=19;a++){const ui=UNITS.length,qs=[];
 /* □の けいさん：□に入る数をもとめる。問題は「きまった たね」から作るので、毎回同じならびになる */
 const OPS={'＋':(a,b)=>a+b,'−':(a,b)=>a-b,'×':(a,b)=>a*b};
 // t=[P,op,Q] または [P,op,Q,op,R]（null が □）。左から じゅんに けいさんする
-function steps(t,x){const v=i=>t[i]==null?x:t[i],a=[OPS[t[1]](v(0),v(2))];if(t.length>3)a.push(OPS[t[3]](a[0],v(4)));return a}
+function steps(t,x){const v=i=>t[i]==null?x:t[i],a=[];let r=v(0);for(let i=1;i<t.length;i+=2){r=OPS[t[i]](r,v(i+1));a.push(r)}return a}
 const mkS=(t,x)=>({type:'s',t,x,c:steps(t,x).pop()});
 function rng(seed){return ()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const RI=(r,a,b)=>a+Math.floor(r()*(b-a+1));
+const PM=r=>r()<.5?'＋':'−';
+// かずの ならび（op でつなぐ）から、どれか1つを □ に かえる
+function hole(r,t){const h=RI(r,0,(t.length-1)/2)*2,x=t[h];t[h]=null;return [t,x]}
+// id と seed は かえない（きろくの かぎに なるため）。かけざんの □（s2・s4）は とりやめた
 const SDEF=[
- {t:'たしざんの □',e:'＋',n:14,mk:r=>{const x=RI(r,3,58),a=RI(r,4,40);return r()<.5?[[null,'＋',a],x]:[[a,'＋',null],x]}},
- {t:'ひきざんの □',e:'−',n:14,mk:r=>{if(r()<.5){const a=RI(r,4,40);return [[null,'−',a],RI(r,a+2,95)]}const a=RI(r,20,98);return [[a,'−',null],RI(r,3,a-2)]}},
- {t:'かけざんの □',e:'×',n:14,mk:r=>{const a=RI(r,2,9),x=RI(r,2,9);return r()<.5?[[null,'×',a],x]:[[a,'×',null],x]}},
- {t:'3つの かずの しき',e:'＋−',n:16,mk:r=>{const t=[RI(r,5,30),r()<.5?'＋':'−',RI(r,2,15),r()<.5?'＋':'−',RI(r,1,12)],h=RI(r,0,2)*2,x=t[h];t[h]=null;return [t,x]}},
- {t:'かけざん まじり',e:'×＋',n:14,mk:r=>{const a=RI(r,2,9),x=RI(r,2,9),b=RI(r,1,12),o=r()<.5?'＋':'−';return [r()<.5?[a,'×',null,o,b]:[null,'×',a,o,b],x]}}];
-SDEF.forEach((d,i)=>{const r=rng(101+i),ui=UNITS.length,qs=[],seen=new Set();
-  for(let n=0;qs.length<d.n&&n<3000;n++){const [t,x]=d.mk(r),st2=steps(t,x),c=st2[st2.length-1],key='s:'+t.map(v=>v==null?'□':v).join('')+'＝'+c;
-    if(x<1||st2.some(v=>v<0)||c>100||c<1||seen.has(key))continue;seen.add(key);qs.push({key,type:'s',u:ui,t,x,c})}
-  UNITS.push({id:'s'+i,g:'S',t:d.t,e:d.e,qs})});
+ {id:'s0',seed:101,max:100,t:'たしざんの □',e:'＋',n:14,mk:r=>{const x=RI(r,3,58),a=RI(r,4,40);return r()<.5?[[null,'＋',a],x]:[[a,'＋',null],x]}},
+ {id:'s1',seed:102,max:100,t:'ひきざんの □',e:'−',n:14,mk:r=>{if(r()<.5){const a=RI(r,4,40);return [[null,'−',a],RI(r,a+2,95)]}const a=RI(r,20,98);return [[a,'−',null],RI(r,3,a-2)]}},
+ {id:'s5',seed:105,max:999,t:'大きい かずの □',e:'大',n:16,mk:r=>{const k=RI(r,0,3);
+   if(k<2){const x=RI(r,101,640),a=RI(r,101,330);return k?[[null,'＋',a],x]:[[a,'＋',null],x]}
+   if(k===2){const a=RI(r,101,450);return [[null,'−',a],RI(r,a+101,980)]}const a=RI(r,300,990);return [[a,'−',null],RI(r,101,a-101)]}},
+ {id:'s3',seed:104,max:100,t:'3つの かずの しき 1',e:'3',n:16,mk:r=>{const t=[RI(r,5,30),r()<.5?'＋':'−',RI(r,2,15),r()<.5?'＋':'−',RI(r,1,12)],h=RI(r,0,2)*2,x=t[h];t[h]=null;return [t,x]}},
+ {id:'s6',seed:106,max:199,t:'3つの かずの しき 2',e:'3+',n:16,mk:r=>hole(r,[RI(r,30,99),PM(r),RI(r,11,60),PM(r),RI(r,11,50)])},
+ {id:'s7',seed:107,max:60,t:'4つの かずの しき 1',e:'4',n:16,mk:r=>hole(r,[RI(r,8,30),PM(r),RI(r,2,12),PM(r),RI(r,2,12),PM(r),RI(r,1,9)])},
+ {id:'s8',seed:108,max:250,t:'4つの かずの しき 2',e:'4+',n:16,mk:r=>hole(r,[RI(r,30,99),PM(r),RI(r,11,45),PM(r),RI(r,6,40),PM(r),RI(r,5,30)])}];
+SDEF.forEach(d=>{const r=rng(d.seed),ui=UNITS.length,qs=[],seen=new Set();
+  for(let n=0;qs.length<d.n&&n<4000;n++){const [t,x]=d.mk(r),st2=steps(t,x),c=st2[st2.length-1],key='s:'+t.map(v=>v==null?'□':v).join('')+'＝'+c;
+    if(x<1||x>999||st2.some(v=>v<0)||c>d.max||c<1||seen.has(key))continue;seen.add(key);qs.push({key,type:'s',u:ui,t,x,c})}
+  UNITS.push({id:d.id,g:'S',t:d.t,e:d.e,qs})});
 KANJI.filter(u=>(u.g||'k')!=='k').forEach(addKanji);
 const GROUPS={k:'かんじ 1',j:'じゅくご',c:'かんじ 2',m:'九九',M:'19×19',S:'□の けいさん'};
 const isK=g=>g==='k'||g==='j'||g==='c';
@@ -259,12 +267,18 @@ function one(P,op,Q,c){
   if(op==='−'){if(P==null){const x=c+Q;return [x,`□から ${Q}を ひくと ${c}。ぎゃくに ${c}に ${Q}を たす：${c} ＋ ${Q} ＝ ${x}`,`ひいて ${c}に なった。ぎゃくに、${c}に ${Q}を たして みよう`]}
     const x=P-c;return [x,`${P}から □を ひくと ${c}。ひいた かずは ${P} − ${c} ＝ ${x}`,`${P}から いくつ ひくと ${c}に なるかな？ ${P} − ${c} を けいさんして みよう`]}
   const o=P==null?Q:P,x=c/o;return [x,`${P==null?'□に '+o:o+'に □'}を かけると ${c}。${o}のだんで ${c}に なるのは ${o}×${x}＝${c}。だから ${x}`,`${o}のだんの 九九で、こたえが ${c}に なるのを さがそう`]}
-function solve(q){const t=q.t,c=q.c;
-  if(t.length===3){const r=one(t[0],t[1],t[2],c);return {lines:[r[1]],hint:r[2]}}
-  if(t[4]==null){const m=OPS[t[1]](t[0],t[2]),r=one(m,t[3],null,c);
-    return {lines:[`① さきに ${t[0]} ${t[1]} ${t[2]} を けいさんする：${m}`,`② しきは「${m} ${t[3]} □ ＝ ${c}」に なる`,'③ '+r[1]],hint:`さきに ${t[0]} ${t[1]} ${t[2]} を けいさんしよう。しきが みじかく なるよ`}}
-  const inv=t[3]==='＋'?'−':'＋',m=t[3]==='＋'?c-t[4]:c+t[4],r=one(t[0],t[1],t[2],m),sub=`${B(t[0])} ${t[1]} ${B(t[2])}`;
-  return {lines:[`① さいごの「${t[3]} ${t[4]}」を もとに もどす：${c} ${inv} ${t[4]} ＝ ${m}`,`② しきは「${sub} ＝ ${m}」に なる`,'③ '+r[1]],hint:`さいごの「${t[3]} ${t[4]}」を もとに もどそう。${c} ${inv} ${t[4]} は いくつ？ それが「${sub}」の こたえだよ`}}
+// □が さいごに あるときは 左から けいさんして しきを みじかくし、そうでなければ さいごの けいさんを もとに もどす。
+// 1つの しきに なったら one() で こたえを 出す
+function solve(q){let t=q.t.slice(),c=q.c,hint='';const raw=[];
+  while(t.length>3){const L=t.length;
+    if(t[L-1]==null){const m=OPS[t[1]](t[0],t[2]);raw.push(`さきに ${t[0]} ${t[1]} ${t[2]} を けいさんする：${m}`);
+      hint=hint||`さきに ${t[0]} ${t[1]} ${t[2]} を けいさんしよう。しきが みじかく なるよ`;t=[m].concat(t.slice(3))}
+    else{const op=t[L-2],R=t[L-1],inv=op==='＋'?'−':'＋',m=op==='＋'?c-R:c+R,sub=t.slice(0,L-2).map(B).join(' ');
+      raw.push(`さいごの「${op} ${R}」を もとに もどす：${c} ${inv} ${R} ＝ ${m}`);
+      hint=hint||`さいごの「${op} ${R}」を もとに もどそう。${c} ${inv} ${R} は いくつ？ それが「${sub}」の こたえだよ`;c=m;t=t.slice(0,L-2)}
+    raw.push(`しきは「${expr(t,c)}」に なる`)}
+  const r=one(t[0],t[1],t[2],c);if(!raw.length)return {lines:[r[1]],hint:r[2],x:r[0]};
+  raw.push(r[1]);return {lines:raw.map((l,i)=>'①②③④⑤⑥⑦⑧'[i]+' '+l),hint,x:r[0]}}
 const howS=q=>`<div class="how">${solve(q).lines.map(l=>`<p>${esc(l)}</p>`).join('')}<p class="fast">たしかめ：${esc(expr(q.t,q.c,q.x))} ⭕</p></div>`;
 /* 19×19：10 と のこり に わけて、へやごとに けいさんする（図つき） */
 function area(a,b,vals){const p=a-10,two=b>10,cols=two?[10,b-10]:[10,p],rows=two?[10,p]:[b],W=[150,116],H=two?[58,46]:[58],x0=40,y0=26;
@@ -459,7 +473,7 @@ function guide(g){stopTick();screen='guide';hush();
     +[{a:13,b:17},{a:14,b:6}].map(q=>`<p class="sent num eq">${q.a} × ${q.b} ＝ ${q.a*q.b}</p><div class="how">${howM(q)}</div>`).join('')
     +'<p class="sent num eq">12 × 10 ＝ 120</p><div class="how"><p>10ばいは、かずの うしろに 0を 1つ つけるだけ。</p></div>';
   else h+='<h1>□の けいさんの やりかた</h1><p>□の かずは、<b>しきを ぎゃくに たどる</b>と わかるよ。たしざんは ひきざんで、ひきざんは たしざんで もとに もどそう。さいごに、□に こたえを いれて たしかめよう。</p>'
-    +[mkS([null,'＋',27],36),mkS([72,'−',null],27),mkS([null,'×',7],8),mkS([15,'−',null,'＋',4],7),mkS([3,'×',null,'＋',4],5)].map(q=>`<p class="sent num eq">${esc(expr(q.t,q.c))}</p>${howS(q)}`).join('');
+    +[mkS([null,'＋',27],36),mkS([72,'−',null],27),mkS([15,'−',null,'＋',4],7),mkS([20,'−',3,'＋',null,'−',5],6)].map(q=>`<p class="sent num eq">${esc(expr(q.t,q.c))}</p>${howS(q)}`).join('');
   $.innerHTML=h+'<div class="bar ctr" style="margin-top:20px"><button class="btn pri big" id="go">▶ やってみる</button></div></div>';
   document.getElementById('bk').onclick=home;document.getElementById('go').onclick=()=>next(g);window.scrollTo(0,0)}
 
@@ -583,7 +597,7 @@ function records(){
   <div class="bar"><button class="btn sm" id="ex">記録を書き出す</button><button class="btn sm" id="im">貼りつけた記録を読みこむ</button><button class="btn sm" id="rs">記録をすべて消す</button><button class="btn sm rev" id="rs2" hidden>本当に消す（元に戻せません）</button></div>
   <textarea id="tx" placeholder="ここに記録の文字列が出ます／貼りつけます"></textarea><p class="okline" id="bm"></p>
   <h2>このクイズについて</h2>
-  <p>「かんじ 1」は160字を、1字につき「よみ」「かき」の2問ずつ（320問）。「じゅくご」は、かんじ 1 と同じ字を使った音読み中心の熟語150語（300問）。「かんじ 2」は、その次の段階の200字（400問）です。どれも意味の近いものでまとまりに分けてあります。例文の、問われている語以外はひらがなで書いてあります。ホーム画面の各コーナーは、見出しを押すとたためます。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。19×19は11〜19の段（各段 ×2〜×19、162問）で、「💡 ヒント」で分け方の図を、答えたあとに「10と残りに分ける」計算の手順を表示します。□の計算は、□に入る数をもとめる問題（5種類・${every('S').length}問）で、ヒントと、式を逆にたどる解き方の説明がつきます。</p></div>`;
+  <p>「かんじ 1」は160字を、1字につき「よみ」「かき」の2問ずつ（320問）。「じゅくご」は、かんじ 1 と同じ字を使った音読み中心の熟語150語（300問）。「かんじ 2」は、その次の段階の200字（400問）です。どれも意味の近いものでまとまりに分けてあります。例文の、問われている語以外はひらがなで書いてあります。ホーム画面の各コーナーは、見出しを押すとたためます。九九は1〜9の段（81問）で、答えたあとに唱え方を表示します。唱え方は教科書によって一部ちがうことがあります。19×19は11〜19の段（各段 ×2〜×19、162問）で、「💡 ヒント」で分け方の図を、答えたあとに「10と残りに分ける」計算の手順を表示します。□の計算は、たし算・ひき算の式で □に入る数をもとめる問題（${UNITS.filter(u=>u.g==='S').length}種類・${every('S').length}問）で、3けたの数や、数が4つある式まであります。ヒントと、式を逆にたどる解き方の説明がつきます。</p></div>`;
   $.innerHTML=h;
   document.getElementById('bk').onclick=home;
   document.getElementById('lv').onclick=()=>{st.set.lv=lv()===2?1:2;save();records()};
