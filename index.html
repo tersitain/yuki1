@@ -41,7 +41,7 @@ h2.sh{cursor:pointer;-webkit-user-select:none;user-select:none;background:var(--
 .tile.bt{position:relative;line-height:1;background:#fff3d6;border-color:#f0cf7a;box-shadow:inset 0 0 0 3px #fffaf0}
 .tile.bt b{font-weight:400;display:block;transform:translateY(-6%)}
 .tile.bt i{position:absolute;left:0;right:0;bottom:3%;font-style:normal;font-size:.26em;color:#e0a100;letter-spacing:.05em;text-align:center}
-.tile.bt.ch{background:#efe6ff;border-color:#c9b2f5;box-shadow:inset 0 0 0 3px #f8f3ff}
+.tile.bt.big{background:#ffe3dc;border-color:#ef8f7f;box-shadow:inset 0 0 0 3px #fff4f1}
 .tile.bt.no{background:var(--card);border-color:var(--line);border-style:dashed;box-shadow:none}
 .tile.bt.no b{filter:brightness(0);opacity:.16}
 @media(prefers-color-scheme:dark){.tile.bt.no b{filter:brightness(0) invert(1);opacity:.2}}
@@ -82,6 +82,9 @@ svg.px{display:block}
 .meter{height:8px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden}
 .meter i{display:block;height:100%;background:var(--acc);border-radius:4px}
 .unit.m .meter i{background:var(--kk)}
+.bigs{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;margin-bottom:10px}
+.bz.big{border-width:3px;padding:8px 2px}.bz.big span{font-size:2.7rem}.bz.big small{font-size:.74rem}
+.bz.big.won{border-color:#ef8f7f}
 .bosses{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
 .bz{border:2px solid var(--line);background:var(--card);border-radius:16px;padding:6px 2px 6px;text-align:center}
 .bz span{display:block;font-size:2rem;line-height:1.3}
@@ -200,8 +203,6 @@ const YOMI=[
  'くいちが く|くに じゅうはち|くさん にじゅうしち|くし さんじゅうろく|くご しじゅうご|くろく ごじゅうし|くしち ろくじゅうさん|くは しちじゅうに|くく はちじゅういち'
 ].map(s=>s.split('|'));
 const MON=['👾','🐲','👹','👻','🦖','🐙','🦂','🕷️','🦇','🐍','🦈','🐊','🦑','🧟','👺','🤖','🦍','🐗','🦅','🐯','🦁','🐉','☃️','🎃','🧛','🦏','🐺','🦕','🐻','🦉','🦀','🐝','🦎','🐘','🐳','🦄','🦔','🐢','🦜','🐬','🦋','🐸','🐰','🐼','🐨','🐵','🐔','🐧','🦆','🦢','🐴','🐮','🐷','🐭','🐹','🦊','🐱','🐶','🐠','🐡','🦐','🦞','🐌','🐞','🐜','🦗','🦚','🐫','🦌','🐿️','🐓'];
-// チャレンジ ボス（なんたいでも ちょうせん できる）の 絵。MON とは かぶらない
-const CMON=['👽','👿','💀','🧙','🧞','🧜','🧚','🧝','🦹','🦸','😈','☠️','🤡','🗿','🌋','🌪️','⚡','🔥','🌊','❄️','☄️','🌵','🍄','🌶️','💣','🧨','🛸','🚀','🏰','🗡️','🛡️','👑','🎩','🔮','🧲','⚙️','🎲','🃏','🌙','⭐','☀️','🌈','🍔','🍕','🍩','🍙','🍡','🍓','🍉','🍌','🥕','🌽','🍆','🧀','🍭','🎈','🎁','⚽','🏀','🎸','🥁','🎺','📚','✏️','🔔','⏰','💡','🔑','🧸','🎯'];
 // 形のにた字（「むずかしい」の かき問題で、まぎらわしい選択肢に使う）
 const LOOK=['話語読記計','線組細紙絵','近遠道通週','間聞門','海池汽活','体何作休','晴明曜時春昼星朝書','雲雪電雨','姉妹女市','茶花草','地場土池','国図回園','思心田','鳴知合台古同兄言高京','家室字','京交高夜方','前切分刀力','弓引強弱弟','鳥馬魚鳴黒点','父交','午牛年','万方','内肉円','米来番','東車','毛手','頭顔首道','光元兄先見','太大犬','少小','首自目白百','古右石','止正上','丸九','今会合食','夏冬麦','秋科','新親','売買読','買貝見','歩走止足','野里理黒','毎海母','用角月','西四','教数','算答','店広','寺時','多夕外名','岩山石'];
 // ボスの制限時間（秒）。たおすたびに短くなる
@@ -486,34 +487,38 @@ function section(d){const t=totals(d.g),f=folded(d.g),nm=GROUPS[d.g];
 // ボスの スタンプ（たおした ボスが そのまま スタンプに なる。まだの ボスは かげ）
 function bossTile(k,size){const b=beaten(k);return `<span class="tile bt ${b?'':'no'}" style="width:${size}px;height:${size}px;font-size:${Math.round(size*.56)}px"><b>${MON[k%MON.length]}</b>${b?`<i>${'★'.repeat(Math.min(3,b))}</i>`:''}</span>`}
 const bossName=u=>(isK(u.g)&&u.g!=='k'?GROUPS[u.g]+' ':'')+u.t;
+// 大ボス：コーナーの ボスを ぜんぶ たおすと あらわれる。もんだいは コーナー ぜんぶから 出る
+const BIG={k:'👿',j:'🧙',c:'🧞',m:'👽',M:'💀',S:'🌋'};
+const bigBeat=g=>st.boss['B'+g]||0;
+const bigLeft=g=>UNITS.filter((u,k)=>u.g===g&&!beaten(k)).length;
+function bigTile(g,size){const b=bigBeat(g);return `<span class="tile bt big ${b?'':'no'}" style="width:${size}px;height:${size}px;font-size:${Math.round(size*.56)}px"><b>${BIG[g]}</b>${b?`<i>${'★'.repeat(Math.min(3,b))}</i>`:''}</span>`}
 function unitCard(u,k){const s=unitStat(k),full=s.c===s.n;
   return `<button class="unit ${isK(u.g)?'k':'m'}" data-u="${k}">${isK(u.g)?`<span class="em">${u.e}</span>`:`<span class="num ${u.e.length>1?'w':''}">${u.e}</span>`}<b>${esc(u.t)}</b><small>${s.c} / ${s.n} もん クリア</small>${s.m?`<span class="badge">ふくしゅう ${s.m}</span>`:full?'<span class="done">⭐</span>':''}<div class="meter"><i style="width:${Math.round(s.c/s.n*100)}%"></i></div></button>`}
 function home(){
-  stopTick();screen='home';hush();const r=rounds(today()),pe=pending().length,won=UNITS.filter((_,k)=>beaten(k)).length;
+  stopTick();screen='home';hush();const r=rounds(today()),pe=pending().length,bigs=Object.keys(BIG),bw=bigs.filter(g=>bigBeat(g)).length,won=UNITS.filter((_,k)=>beaten(k)).length+bw;
   const tot=allStamps(),fl=Math.floor(tot/PET),pet=tot%PET,open=!!st.set.album;let got='';
   // たおした ボス（あたらしい じゅん）
   const wonK=UNITS.map((u,k)=>k).filter(k=>beaten(k)).sort((a,b)=>((st.bt||{})[UNITS[b].id]||0)-((st.bt||{})[UNITS[a].id]||0)||b-a);
-  const cb=chalN(),cs=chalSrc().length;
-  if(!open){for(let i=Math.max(0,fl-4);i<fl;i++)got+=tile(PET,46,i);if(fl&&wonK.length)got+='<span class="sep"></span>';wonK.slice(0,4).reverse().forEach(k=>got+=bossTile(k,46));
-    if(cb&&(fl||wonK.length))got+='<span class="sep"></span>';for(let i=Math.max(0,cb-4);i<cb;i++)got+=chalTile(i,46)}
+  if(!open){for(let i=Math.max(0,fl-5);i<fl;i++)got+=tile(PET,46,i);if(fl&&wonK.length)got+='<span class="sep"></span>';wonK.slice(0,5).reverse().forEach(k=>got+=bossTile(k,46));
+    if(bw)got+='<span class="sep"></span>'+bigs.filter(g=>bigBeat(g)).map(g=>bigTile(g,46)).join('')}
   const fb=folded('boss');
   let album='';
   if(open){let a='';for(let i=0;i<fl;i++)a+=tile(PET,56,i);
     album=`<div class="album"><h3>🥚 いきもの <small>${fl}こ</small></h3>${fl?`<div class="alb">${a}</div>`:`<p>まだ いないよ。${PET}かい やると 1こ できるよ。</p>`}
-    <h3>🔥 チャレンジ ボス <small>${cb}たい</small></h3><div class="alb">${Array.from({length:cb},(_,i)=>chalTile(i,56)).join('')}${chalTile(cb,56,true)}</div>
+    <h3>👑 大ボス <small>${bw} / ${bigs.length}たい</small></h3><div class="alb b">${bigs.map(g=>`<div>${bigTile(g,60)}<small>${GROUPS[g]}</small></div>`).join('')}</div>
     <h3>👾 ボス <small>${wonK.length} / ${UNITS.length}たい</small></h3><div class="alb b">${UNITS.map((u,k)=>`<div>${bossTile(k,60)}<small>${esc(bossName(u))}</small></div>`).join('')}</div></div>`}
   let h=`<div class="head"><h1>かんじ・けいさん クイズ</h1><div class="hb"><button class="link" id="sd">${sndOn()?'🔊 おと あり':'🔇 おと なし'}</button><button class="link" id="rc">おうちの方へ</button></div></div>
-  <div class="stampbox"><div class="cur">${tile(pet,84,fl)}<div><b>スタンプ <em>${fl+wonK.length+cb}</em> こ</b><small>いきもの ${fl}・ボス ${wonK.length}・チャレンジ ${cb}</small><small>いまは「${STAGE[pet]}」。あと ${PET-pet}かいで おとなに なるよ</small></div></div>
+  <div class="stampbox"><div class="cur">${tile(pet,84,fl)}<div><b>スタンプ <em>${fl+wonK.length+bw}</em> こ</b><small>いきもの ${fl}・ボス ${wonK.length}・大ボス ${bw}</small><small>いまは「${STAGE[pet]}」。あと ${PET-pet}かいで おとなに なるよ</small></div></div>
   <div class="got">${got}</div>
   <div class="cnt"><span>きょう <i>${r}</i> かい</span><span>れんぞく <i>${streak()}</i> 日</span></div>
   <button class="more" id="alb">${open?'▲ とじる':'▼ ぜんぶ みる'}</button>${album}</div>
   ${lsOK||idbOK?'':`<p class="alert">${whereSaved()}。</p>`}
   ${pe?`<div class="bar"><button class="btn rev" id="rev">🔁 まちがえた もんだいを ふくしゅう（${pe}もん）</button></div>`:''}
   ${SECS.map(section).join('')}
-  <h2 class="sh" data-f="boss"><span class="chev">${fb?'▶':'▼'}</span><span>👾 ボスバトル</span><small>たおした かず ${won} / ${UNITS.length}　チャレンジ ${cb}</small></h2>
-  ${fb?'':`<div class="bar"><button class="btn rev big" id="chal" ${cs<CH_MIN?'disabled':''}>🔥 チャレンジ ボス No.${cb+1}</button></div>
-  <p class="note" style="margin:0 0 12px">${cs<CH_MIN?'クリアした もんだいが '+CH_MIN+'もんに なると、ちょうせん できるよ（いま '+cs+'もん）。':'いままでに クリアした もんだい ぜんぶから 出るよ。かつと ボスが スタンプに なって、つぎの ボスが あらわれるよ。なんたいでも ちょうせん できるよ。'}</p>
-  <p class="alert" id="lk" hidden></p>
+  <h2 class="sh" data-f="boss"><span class="chev">${fb?'▶':'▼'}</span><span>👾 ボスバトル</span><small>たおした かず ${won} / ${UNITS.length+bigs.length}</small></h2>
+  ${fb?'':`<p class="alert" id="lk" hidden></p>
+  <div class="bigs">${bigs.map(g=>{const b=bigBeat(g),l=bigLeft(g);
+    return `<button class="bz big ${b?'won':'off'} ${l?'lock':b?'':'ready'}" data-big="${g}"><span>${BIG[g]}</span><small>${GROUPS[g]}の 大ボス${b?'<br>'+'★'.repeat(Math.min(3,b)):l?'<br>🔒 ボス あと'+l+'たい':'<br>たたかう！'}</small></button>`}).join('')}</div>
   <div class="bosses">${UNITS.map((u,k)=>{const b=beaten(k),l=lockLeft(k);
     return `<button class="bz ${b?'won':'off'} ${l?'lock':b?'':'ready'}" data-b="${k}"><span>${MON[k%MON.length]}</span><small>${isK(u.g)&&u.g!=='k'?GROUPS[u.g]+'<br>':''}${esc(u.t)}${b?'<br>'+'★'.repeat(Math.min(3,b)):l?'<br>🔒 あと'+l+'もん':'<br>たたかう！'}</small></button>`}).join('')}</div>`}
   <p class="note">1かい ${N}もん。おわると たまごが すこし そだつよ。${PET}かいで おとなに なって、いきものスタンプが 1こ できるよ。まとまりの もんだいを ぜんぶ クリアすると、ボスと たたかえるよ。ボスを たおすと、その ボスも スタンプに なるよ。${lv()===2?'ボスは じかんせいげん つき。3もん つづけて せいかいすると コンボで こうげきが 2ばいに なるよ。':''}</p>`;
@@ -525,9 +530,10 @@ function home(){
   $.querySelectorAll('[data-f]').forEach(h=>h.onclick=()=>{const g=h.dataset.f,y=window.scrollY;st.set.fold=st.set.fold||{};st.set.fold[g]=!st.set.fold[g];save();sfx('tap');home();window.scrollTo(0,y)});
   document.getElementById('rc').onclick=()=>records();
   document.getElementById('sd').onclick=()=>{st.set.snd=!sndOn();save();sfx('ok');home()};
-  const chb=document.getElementById('chal');if(chb)chb.onclick=challenge;
   document.getElementById('alb').onclick=()=>{st.set.album=!st.set.album;save();sfx('tap');home()};
   if(pe)document.getElementById('rev').onclick=review;
+  $.querySelectorAll('[data-big]').forEach(b=>b.onclick=()=>{const g=b.dataset.big,n=bigLeft(g);if(!n)return bigBoss(g);
+    const e=document.getElementById('lk');e.hidden=false;e.textContent='🔒 「'+GROUPS[g]+'」の 大ボスは、この コーナーの ボスを ぜんぶ たおすと あらわれるよ（あと '+n+'たい）。';e.scrollIntoView({block:'nearest'})});
   $.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{const k=+b.dataset.b,n=lockLeft(k);if(!n)return boss(k);
     const e=document.getElementById('lk');e.hidden=false;e.textContent='🔒 「'+UNITS[k].t+'」の ボスと たたかうには、あと '+n+'もん クリアしよう。';e.scrollIntoView({block:'nearest'})});
   window.scrollTo(0,0)}
@@ -632,30 +638,23 @@ function boss(u){const U=UNITS[u],hard=lv()===2,sec=hard?TIME[U.g][Math.min(2,be
   fight({name:esc(U.t)+'の ボス'+(beaten(u)?'　Lv.'+(Math.min(2,beaten(u))+1):''),mon:MON[u%MON.length],HP:hard?10:8,sec:()=>sec,
     draw(){if(!pool.length)pool=shuf(U.qs);return pool.pop()},
     done(win){const first=win&&!beaten(u);if(win){st.boss[U.id]=beaten(u)+1;st.bt=st.bt||{};st.bt[U.id]=Date.now();save()}
+      const big=first&&!bigLeft(U.g)&&!bigBeat(U.g);   // これで コーナーの ボスを ぜんぶ たおした
       $.innerHTML=`<div class="card res"><div class="stamp">${win?bossTile(u,190):'💦'}</div><h1>${win?'ボスを たおした！':'ざんねん…'}</h1>
       <p class="sc">${win?(first?'「'+esc(U.t)+'」の ボスが スタンプに なったよ！':'スタンプの ★が '+Math.min(3,beaten(u))+'こに なったよ！'):'もういちど れんしゅうして、また ちょうせんしよう。'}</p>
-      ${win&&hard&&beaten(u)<3?'<p class="sc">つぎは ボスが レベルアップ！ じかんが みじかく なるよ。</p>':''}
-      <div class="bar ctr"><button class="btn ${win?'':'pri'} big" id="ag">${win?'もういちど たたかう':'もういちど'}</button>${win?'':`<button class="btn big" id="pr">れんしゅうする</button>`}<button class="btn ${win?'pri':''} big" id="hm">おわる</button></div></div>`;
+      ${big?`<p class="alert">「${GROUPS[U.g]}」の ボスを ぜんぶ たおした！ 大ボスが あらわれた！</p>`:win&&hard&&beaten(u)<3?'<p class="sc">つぎは ボスが レベルアップ！ じかんが みじかく なるよ。</p>':''}
+      <div class="bar ctr">${big?`<button class="btn rev big" id="bg">${BIG[U.g]} 大ボスと たたかう</button>`:''}<button class="btn ${win?'':'pri'} big" id="ag">${win?'もういちど たたかう':'もういちど'}</button>${win?'':`<button class="btn big" id="pr">れんしゅうする</button>`}<button class="btn ${win&&!big?'pri':''} big" id="hm">おわる</button></div></div>`;
       document.getElementById('hm').onclick=home;document.getElementById('ag').onclick=()=>boss(u);
+      if(big)document.getElementById('bg').onclick=()=>bigBoss(U.g);
       if(!win)document.getElementById('pr').onclick=()=>start(u)}})}
-
-/* ---- チャレンジ ボス：クリアした もんだい ぜんぶから 出る。かつたびに あたらしい ボスが あらわれる ---- */
-const CH_MIN=20;
-const chalSrc=()=>every().filter(q=>{const x=rec0(q.key);return x.r||x.m});
-const chalN=()=>st.cb||0;
-function chalTile(i,size,ghost){const lap=Math.floor(i/CMON.length);return `<span class="tile bt ch ${ghost?'no':''}" style="width:${size}px;height:${size}px;font-size:${Math.round(size*.56)}px"><b>${CMON[i%CMON.length]}</b>${!ghost&&lap?`<i>${'★'.repeat(Math.min(3,lap))}</i>`:''}</span>`}
-function challenge(){const n=chalN(),hard=lv()===2,lvl=Math.min(2,Math.floor(n/10)),R=q=>rec0(q.key),src=chalSrc();
-  if(src.length<CH_MIN)return home();
-  // ふくしゅうまち → こたえてから 時間が たったもの の じゅんに えらぶ
-  const order=src.slice().sort((a,b)=>(R(b).m-R(a).m)||((R(a).t||0)-(R(b).t||0)));let pool=shuf(uniq(order,30));
-  fight({name:'チャレンジ ボス No.'+(n+1),mon:CMON[n%CMON.length],HP:hard?12+2*Math.min(4,Math.floor(n/5)):10,
-    sec:q=>hard?TIME[UNITS[q.u].g][lvl]:0,
-    draw(){if(!pool.length)pool=shuf(uniq(shuf(src),30));return pool.pop()},
-    done(win){if(win){st.cb=n+1;st.cbt=Date.now();save()}
-      $.innerHTML=`<div class="card res"><div class="stamp">${win?chalTile(n,190):'💦'}</div><h1>${win?'チャレンジ ボス No.'+(n+1)+'を たおした！':'ざんねん…'}</h1>
-      <p class="sc">${win?'ボスが スタンプに なったよ！ つぎは No.'+(n+2)+'が あらわれるよ。':'もういちど ちょうせんしよう。'}</p>
-      <div class="bar ctr"><button class="btn pri big" id="ag">${win?'つぎの ボスへ':'もういちど'}</button><button class="btn big" id="hm">おわる</button></div></div>`;
-      document.getElementById('hm').onclick=home;document.getElementById('ag').onclick=challenge}})}
+function bigBoss(g){if(bigLeft(g))return home();const hard=lv()===2,n=bigBeat(g),sec=hard?TIME[g][Math.min(2,n)]:0,all=every(g);let pool=[];
+  fight({name:GROUPS[g]+'の 大ボス'+(n?'　Lv.'+(Math.min(2,n)+1):''),mon:BIG[g],HP:hard?20:14,sec:()=>sec,
+    draw(){if(!pool.length)pool=shuf(uniq(shuf(all),40));return pool.pop()},
+    done(win){if(win){st.boss['B'+g]=n+1;st.bt=st.bt||{};st.bt['B'+g]=Date.now();save()}
+      $.innerHTML=`<div class="card res"><div class="stamp">${win?bigTile(g,200):'💦'}</div><h1>${win?'大ボスを たおした！🎉':'ざんねん…'}</h1>
+      <p class="sc">${win?(n?'スタンプの ★が '+Math.min(3,n+1)+'こに なったよ！':'「'+GROUPS[g]+'」の 大ボスが スタンプに なったよ！'):'大ボスは つよい。もういちど ちょうせんしよう。'}</p>
+      ${win&&hard&&n<2?'<p class="sc">つぎは 大ボスが レベルアップ！ じかんが みじかく なるよ。</p>':''}
+      <div class="bar ctr"><button class="btn ${win?'':'pri'} big" id="ag">${win?'もういちど たたかう':'もういちど'}</button><button class="btn ${win?'pri':''} big" id="hm">おわる</button></div></div>`;
+      document.getElementById('hm').onclick=home;document.getElementById('ag').onclick=()=>bigBoss(g)}})}
 
 /* ---- おうちの方へ（きろく） ---- */
 function records(){
@@ -670,7 +669,7 @@ function records(){
   ${days.map(([k,v])=>`<tr><td>${k}</td><td class="r">${v[2]||0}</td><td class="r">${v[0]}</td><td class="r">${v[1]}</td><td class="r">${v[0]?Math.round(v[1]/v[0]*100)+'%':'–'}</td></tr>`).join('')}</table>`:'<p>まだ記録がありません。</p>'}
   <h2>まとまりごとの進み具合</h2><table><tr><th>まとまり</th><th class="r">クリア</th><th class="r">正答率</th><th class="r">復習待ち</th><th class="r">ボス</th></tr>
   ${UNITS.map((u,k)=>{const s=unitStat(k);return `<tr><td>${GROUPS[u.g]}：${esc(u.t)}</td><td class="r">${s.c} / ${s.n}</td><td class="r">${s.rate==null?'–':s.rate+'%'}</td><td class="r ${s.m?'ngc':''}">${s.m||'–'}</td><td class="r">${beaten(k)?'★'.repeat(Math.min(3,beaten(k))):'–'}</td></tr>`}).join('')}</table>
-  <p class="note" style="margin-top:6px">1回（${N}問）おわるごとに、たまごのいきものが1段階そだち、${PET}回でおとなになって「いきものスタンプ」1こになります（いま ${Math.floor(allStamps()/PET)}こ）。いきものは${PETS.length}種類で、順番に生まれます。一巡して同じいきものが生まれるときは、リボンやおうかんなどのかざりがつきます（${ACC.length}種類）。ボスをたおすと、そのボスもスタンプになります（たおした回数で★が最大3つ）。「チャレンジ ボス」は、これまでにクリアした問題すべてから出題される復習用のボスで、勝つたびに次のボスがあらわれ、何体でも挑戦できます（復習待ちの問題と、答えてから時間がたった問題を優先）。ホーム画面の「ぜんぶ みる」で、すべてのスタンプと、まだたおしていないボスの影を見られます。クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
+  <p class="note" style="margin-top:6px">1回（${N}問）おわるごとに、たまごのいきものが1段階そだち、${PET}回でおとなになって「いきものスタンプ」1こになります（いま ${Math.floor(allStamps()/PET)}こ）。いきものは${PETS.length}種類で、順番に生まれます。一巡して同じいきものが生まれるときは、リボンやおうかんなどのかざりがつきます（${ACC.length}種類）。ボスをたおすと、そのボスもスタンプになります（たおした回数で★が最大3つ）。コーナーのボスを全部たおすと、そのコーナーの「大ボス」があらわれます（6体。問題はコーナー全体から出て、体力は通常のボスの2倍）。ホーム画面の「ぜんぶ みる」で、すべてのスタンプと、まだたおしていないボスの影を見られます。クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
   <h2>まちがえたことのある問題（${wrong.length}問）</h2>${wrong.length?`<table><tr><th>問題</th><th class="r">まちがい</th><th class="r">正解</th><th class="r">いま</th></tr>
   ${wrong.map(q=>{const x=rec0(q.key);return `<tr><td>${esc(plain(q))}</td><td class="r ngc">${x.w}</td><td class="r">${x.r}</td><td class="r">${x.m?'復習待ち':'○'}</td></tr>`}).join('')}</table>`:'<p>まだありません。</p>'}
   <h2>設定</h2>
