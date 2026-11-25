@@ -438,10 +438,25 @@ function grid(stage,ci){
   if(stage===5)return KID;if(stage===4)return BABY;
   if(stage===3){const g=BABY.slice(3).concat(['................','................','................']);return g.map((r,y)=>SHELL[y]?[...SHELL[y]].map((c,x)=>c==='.'?r[x]:c).join(''):r)}
   const g=EGG.map(r=>[...r]);if(stage>=1)CRACK.forEach(([y,x])=>g[y][x]='k');if(stage===2)CRACK2.forEach(([y,x])=>g[y][x]='k');return g.map(r=>r.join(''))}
-function pet(stage,size,ci){const P=petOf(ci),col=P.c;let h='';
-  grid(stage,ci).forEach((r,y)=>{for(let x=0;x<16;){const c=r[x];let n=1;while(x+n<16&&r[x+n]===c)n++;
-    if(c!=='.')h+=`<rect x="${x}" y="${y}" width="${n}" height="1" fill="${c==='c'?col[0]:c==='b'?col[1]:PX[c]}"/>`;x+=n}});
-  return `<svg class="px" viewBox="0 0 16 16" width="${size}" height="${size}" shape-rendering="crispEdges" aria-hidden="true">${h}</svg>`}
+// かざり：おなじ いきものが 2かいめ いこうに うまれるとき、1しゅうごとに ちがう かざりを つける
+// x=左はし、dy=あたまの てっぺんから 見た 上はしの いち（マイナスは 上）
+const AC={y:'#ffcf33',G:'#e0a100',r:'#e8504a',d:'#b83232',1:'#5b8def',2:'#ff8fab',f:'#ff6f9c',k:'#3b2f28',w:'#ffffff'};
+const ACC=[
+ {n:'リボンの ',x:9,dy:-2,d:['rr.rr','rrdrr','rr.rr']},
+ {n:'おうかんの ',x:5,dy:-3,d:['y.yy.y','yyyyyy','GrGGrG']},
+ {n:'ぼうしの ',x:5,dy:-4,d:['..yy..','..11..','.2222.','111111']},
+ {n:'はなかざりの ',x:4,dy:-2,d:['.f.','fyf','.f.']},
+ {n:'シルクハットの ',x:5,dy:-4,d:['.kkkk.','.kkkk.','.rrrr.','kkkkkk']}];
+const lapOf=ci=>Math.floor(ci/PETS.length);
+const accOf=ci=>lapOf(ci)?ACC[(lapOf(ci)-1)%ACC.length]:null;
+const petName=ci=>(accOf(ci)?accOf(ci).n:'')+petOf(ci).n;
+function runs(r,y,x0,fill){let h='';for(let x=0;x<r.length;){const c=r[x];let n=1;while(x+n<r.length&&r[x+n]===c)n++;
+  if(c!=='.')h+=`<rect x="${x0+x}" y="${y}" width="${n}" height="1" fill="${fill(c)}"/>`;x+=n}return h}
+function pet(stage,size,ci){const P=petOf(ci),col=P.c,g=grid(stage,ci),A=stage>=PET?accOf(ci):null;let h='';
+  g.forEach((r,y)=>{h+=runs(r,y,0,c=>c==='c'?col[0]:c==='b'?col[1]:PX[c])});
+  if(A){let top=g.findIndex(r=>/[^.]/.test(r.slice(6,10)));if(top<0)top=3;A.d.forEach((r,i)=>{h+=runs(r,top+A.dy+i,A.x,c=>AC[c])})}
+  // かざりが あたまの 上に はみ出すので、かざりつきは すこし ひいて うつす
+  return `<svg class="px" viewBox="${A?'-1.5 -3 19 19':'0 0 16 16'}" width="${size}" height="${size}" shape-rendering="crispEdges" aria-hidden="true">${h}</svg>`}
 const tile=(stage,size,ci)=>`<span class="tile" style="width:${size}px;height:${size}px">${pet(stage,Math.round(size*.8),ci)}</span>`;
 
 /* ---- 出題のえらび方 ---- */
@@ -565,7 +580,7 @@ function run(qs,title,u,g,isRev){
     screen='res';stamp();const r=rounds(today()),tot=allStamps(),pet=tot%PET,full=pet===0;sfx(full?'adult':'grow');
     let stars='';for(let i=0;i<base;i++)stars+=i<score?'★':'<i>★</i>';
     const bossReady=u!=null&&!lockLeft(u)&&!beaten(u);
-    $.innerHTML=`<div class="card res"><div class="stamp">${full?tile(PET,200,tot/PET-1):tile(pet,170,Math.floor(tot/PET))}</div><h1>${full?petOf(tot/PET-1).n+'に そだった！🎉':GROW[pet]}</h1>
+    $.innerHTML=`<div class="card res"><div class="stamp">${full?tile(PET,200,tot/PET-1):tile(pet,170,Math.floor(tot/PET))}</div><h1>${full?petName(tot/PET-1)+'に そだった！🎉':GROW[pet]}</h1>
     <p class="sc">${base}もん中 ${score}もん せいかい${score===base?'　ぜんぶ せいかい！':''}</p><div class="star">${stars}</div>
     <p class="sc">${full?'いきものスタンプが '+tot/PET+'こに なったよ！ つぎの たまごが とどいたよ。':'あと '+(PET-pet)+'かいで おとなに なるよ'}</p>
     ${bossReady?`<p class="alert">「${esc(UNITS[u].t)}」を ぜんぶ クリア！ ボスが あらわれた！</p>`:''}
@@ -627,7 +642,7 @@ function records(){
   ${days.map(([k,v])=>`<tr><td>${k}</td><td class="r">${v[2]||0}</td><td class="r">${v[0]}</td><td class="r">${v[1]}</td><td class="r">${v[0]?Math.round(v[1]/v[0]*100)+'%':'–'}</td></tr>`).join('')}</table>`:'<p>まだ記録がありません。</p>'}
   <h2>まとまりごとの進み具合</h2><table><tr><th>まとまり</th><th class="r">クリア</th><th class="r">正答率</th><th class="r">復習待ち</th><th class="r">ボス</th></tr>
   ${UNITS.map((u,k)=>{const s=unitStat(k);return `<tr><td>${GROUPS[u.g]}：${esc(u.t)}</td><td class="r">${s.c} / ${s.n}</td><td class="r">${s.rate==null?'–':s.rate+'%'}</td><td class="r ${s.m?'ngc':''}">${s.m||'–'}</td><td class="r">${beaten(k)?'★'.repeat(Math.min(3,beaten(k))):'–'}</td></tr>`}).join('')}</table>
-  <p class="note" style="margin-top:6px">1回（${N}問）おわるごとに、たまごのいきものが1段階そだち、${PET}回でおとなになって「いきものスタンプ」1こになります（いま ${Math.floor(allStamps()/PET)}こ）。いきものは${PETS.length}種類で、順番に生まれます。ボスをたおすと、そのボスもスタンプになります（たおした回数で★が最大3つ）。ホーム画面の「ぜんぶ みる」で、すべてのスタンプと、まだたおしていないボスの影を見られます。クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
+  <p class="note" style="margin-top:6px">1回（${N}問）おわるごとに、たまごのいきものが1段階そだち、${PET}回でおとなになって「いきものスタンプ」1こになります（いま ${Math.floor(allStamps()/PET)}こ）。いきものは${PETS.length}種類で、順番に生まれます。一巡して同じいきものが生まれるときは、リボンやおうかんなどのかざりがつきます（${ACC.length}種類）。ボスをたおすと、そのボスもスタンプになります（たおした回数で★が最大3つ）。ホーム画面の「ぜんぶ みる」で、すべてのスタンプと、まだたおしていないボスの影を見られます。クリア＝1回以上正解した問題。正答率は、各問題のいちばん新しい答えで計算しています。まちがえた問題は「復習待ち」に入り、2回つづけて正解すると外れます。</p>
   <h2>まちがえたことのある問題（${wrong.length}問）</h2>${wrong.length?`<table><tr><th>問題</th><th class="r">まちがい</th><th class="r">正解</th><th class="r">いま</th></tr>
   ${wrong.map(q=>{const x=rec0(q.key);return `<tr><td>${esc(plain(q))}</td><td class="r ngc">${x.w}</td><td class="r">${x.r}</td><td class="r">${x.m?'復習待ち':'○'}</td></tr>`}).join('')}</table>`:'<p>まだありません。</p>'}
   <h2>設定</h2>
